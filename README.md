@@ -1,3 +1,6 @@
+# Project Part 1: Proposal
+My proposal for part 1 of the project can be found in the products folder (proposal.Rmd and proposal.html). 
+
 # Overview
 
 A template file and folder structure for a data analysis project/paper done with R/Rmarkdown/Github. 
