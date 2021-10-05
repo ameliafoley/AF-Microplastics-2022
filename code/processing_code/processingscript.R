@@ -4,45 +4,58 @@
 #this script loads the raw data, processes and cleans it 
 #and saves it as Rds file in the processed_data folder
 
-#load needed packages. make sure they are installed.
+#load  packages
 library(readxl) #for loading Excel files
 library(dplyr) #for data processing
 library(here) #to set paths
 
 #path to data
-#note the use of the here() package and not absolute paths
-data_location <- here::here("data","raw_data","exampledata.xlsx")
+data_location1 <- here::here("data","raw_data","mpdata_ALL.xlsx")
+data_location2 <- here::here("data","raw_data","uown 8.26.xlsx")
 
 #load data. 
-#note that for functions that come from specific packages (instead of base R)
-# I often specify both package and function like so
-#package::function() that's not required one could just call the function
-#specifying the package makes it clearer where the function "lives",
-#but it adds typing. You can do it either way.
-rawdata <- readxl::read_excel(data_location)
+rawdata1 <- read_excel(data_location1)
+rawdata2 <- read_excel(data_location2)
 
 #take a look at the data
-dplyr::glimpse(rawdata)
+glimpse(rawdata1)
+glimpse(rawdata2)
 
-#dataset is so small, we can print it to the screen.
-#that is often not possible.
-print(rawdata)
+#view the dataset on screen
+print(rawdata1)
+print(rawdata2)
 
-# looks like we have measurements for height (in centimeters) and weight (in kilogram)
+#we have 11 variables in the first dataset, and 18 in the second. These variables
+#should correspond so that we can combine the datasets
 
-# there are some problems with the data: 
-# There is an entry which says "sixty" instead of a number. 
-# Does that mean it should be a numeric 60? It somehow doesn't make
-# sense since the weight is 60kg, which can't happen for a 60cm person (a baby)
-# Since we don't know how to fix this, we need to remove the person.
-# This "sixty" entry also turned all Height entries into characters instead of numeric.
-# We need to fix that too.
-# Then there is one person with a height of 6. 
-# that could be a typo, or someone mistakenly entered their height in feet.
-# Since we unfortunately don't know, we'll have to remove this person.
-# similarly, there is a person with weight of 7000, which is impossible,
-# and one person with missing weight.
-# to be able to analyze the data, we'll remove those 5 individuals
+rawdata <- full_join(rawdata1, rawdata2)
+
+# now, we have a combined dataset to work with
+
+glimpse(rawdata)
+
+# the notes column won't be neccessary for data analysis. Columns 16, 17, and 18 
+# are also unnecessary. Let's remove those. 
+
+processeddata <- rawdata %>% select(-"notes", -(16:18))
+
+# assessing missing values
+is.na(processeddata) %>% summary()
+
+# There are a lot of missing values for the c_count and d_count. These 
+# variables resulted from the fourth quarterly sampling in the dataset, when
+# volunteers were enlisted to participate in a microplastics visual identificaiton
+# training session, and volunteers then completed counts. IDs (a, b, c, etc) were 
+# recorded for volunteers. Each biological samples usually includes two technical 
+# replicates - the a_count and b_count. For the volunteer session, each set of 
+# replicates was counted twice (once by two different volunteers) in order to 
+# assess the efficacy of the training program/reproducability of counts. 
+
+# Some options: 
+# 1. Subset the data into one group of all samples with just a_count
+# and b_count and another group with counts a, b, c, and d for the July sampling
+# 2. Tidy the data by filling in all "id" information (all missing ids for previous
+# samplings would be me (1)). 
 
 # this is one way of doing it. Note that if the data gets updated, 
 # we need to decide if the thresholds are ok (newborns could be <50)
