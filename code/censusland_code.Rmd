@@ -1,0 +1,82 @@
+---
+title: "census-land-data"
+output: html_document
+---
+
+##Load Dependencies
+The following code loads the package dependencies for our analysis:
+```{r}
+#install.packages("tidycensus", repos = "http://cran.us.r-project.org")
+#install.packages("censusapi", repos = "http://cran.us.r-project.org")
+#install.packages("censusGeography", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/chron_2.3-55.tgz")
+#install.packages("rerddap", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/rerddap_0.6.5.tgz")
+
+library(tidyverse)
+library(dplyr) #data wrangling
+library(tidycensus) #access census data
+library(censusapi)
+library(rerddap)
+library(RCurl)
+
+#path to data
+data_location <- here::here("data","processed_data","cleansampledata.rds")
+
+#load data. 
+data <- readRDS(data_location)
+```
+
+##Load Census API (load only once)
+```{r}
+#specify from which package a function is to be used
+
+#tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE) 
+```
+^This is not a code chunk you will need in every notebook. As long as "install = TRUE", you will only have to do this once. 
+#restart R session after installing the first time
+
+##Obtain FIPS codes for sampling sites
+```{r}
+#create function
+latlong2fips <- function(latitude, longitude) {
+  url <- "https://geo.fcc.gov/api/census/block/find?format=json&latitude=%f&longitude=%f"
+  url <- sprintf(url, latitude, longitude)
+  json <- RCurl::getURL(url)
+  json <- RJSONIO::fromJSON(json)
+  as.character(json$County['FIPS'])
+}
+#vectorize so function will take more than one argument
+latlong2fips_vec <- Vectorize(latlong2fips, vectorize.args = "latitude", "longitude")
+```
+
+#accessing NHGIS land use/land cover data from downloaded file
+source:https://www.nhgis.org/user-resources/environmental-summaries#download
+```{r}
+#path to data
+data_location1 <- here::here("data","raw_data","landcover2015.csv")
+
+#load data. 
+landcover <- read.csv(data_location1)
+
+class(landcover$GISJOIN)
+#class = character, so I can use strsplit(). Data source uses extra letters and zeroes in their GIS code. I need to extract the original FIPS code to match my data
+
+#extract state fip from GISJOIN
+landcover = landcover %>% mutate(state_fip = substring(landcover$GISJOIN, 2,3)) %>% relocate(state_fip)
+
+#extract county fip from GISJOIN
+landcover = landcover %>% mutate(county_fip = substring(landcover$GISJOIN, 5, 7)) %>% relocate(county_fip)
+
+#combine to state, county fip for whole fips codes
+landcover$fips = paste0(landcover$state_fip, landcover$county_fip)
+
+landcover <- landcover %>%
+  select(fips, everything()) # moving fips column to far left of data set
+
+#filter to clean data set
+landcoverclean = landcover %>% select(-GISJOIN, -state_fip, -county_fip, -OID)
+
+athensfips <- c("13219", "13059")
+athensland <- filter(landcoverclean, fips %in% athensfips) 
+
+```
+
