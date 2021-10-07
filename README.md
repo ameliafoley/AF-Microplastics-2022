@@ -8,7 +8,10 @@ I plan to write my project report in the style of a manuscript, so I my loading/
 
 
 # Reproducing this project
-
+All required data files are located within this R.project file on GitHub. Run scripts in this order:
+1. mpprocessing.R
+2. censusland_code.Rmd
+3. uownprocessing.Rmd
 
 
 

@@ -1,0 +1,93 @@
+---
+title: "uownprocessing"
+output: html_document
+---
+This script loads the raw UOWN data, processes and cleans it 
+and saves it as Rds file in the processed_data folder. While the microplastics data is the focus of my project, I am interested in comapring UOWN's data on bacteria levels with the recorded microplastic levels at samples sites throughout the study timeframe. 
+
+# load packages
+```{r}
+library(readxl) #for loading Excel files
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+```
+
+# path to data & load data
+```{r}
+data_location1 <- here::here("data","raw_data","UOWN_spring2021.csv")
+
+uowndata <- read.csv(data_location1)
+```
+
+# Take a look at data
+```{r}
+glimpse(uowndata)
+```
+
+# Subsetting UOWN data
+```{r}
+uowndata <- uowndata %>% filter((year == 2020 & month == 11) | (year == 2021 & quarter == 1) | (year == 2021 & quarter == 2 )| (year == 2021 & quarter == 3))
+```
+
+Now we have the UOWN data from just the samples dates that we also have the microplastic data for. Right now, only Nov 2020, Feb 2021, and April 2021 data are available from the UOWN website, but July 2021 data should be available soon and I will add it in whenever it is posted. The code chunk above should already include the code to load the July data when the updated file is available. 
+
+# Cleaning up the data
+```{r}
+cleanuowndata <- uowndata %>% select(-"ecoli.method.known", 
+                                     -"biological_score",
+                                     -"po4.mgL", 
+                                     -"conductivity.uscm",
+                                     -"no3.mgL",
+                                     -"pH") %>%
+  rename(site=WSID)
+
+```
+
+# Save UOWN data alone
+```{r}
+# save data as RDS
+
+# location to save file
+save_data_location <- here::here("data","processed_data","cleanuowndata.rds") 
+
+saveRDS(cleanuowndata, file = save_data_location)
+```
+
+# Combine UOWN data with microplastic sample data
+```{r}
+# load MP data
+data_location <- here::here("data","processed_data","cleansampledata.rds")
+cleansampledata <- readRDS(data_location)
+
+# edit site column to match UOWN data
+# remove white space in site name 
+cleansampledata <- cleansampledata %>% mutate(site = 
+                                     gsub(" ","",cleansampledata$site))
+
+# join data sets by site name (cleansampledata) / WSID (cleanuowndata)
+joindata <- left_join(cleansampledata, cleanuowndata, by = "site")
+
+# we joined the data by site, but we also need to join it by date. we'll have to clean up some of the columns in order to do that
+
+# edit date format by creating new columns for month and year
+cleansampledata <- cleansampledata %>% mutate(year = ifelse(date == "nov_20", "2020", "2021")) %>% mutate(month = ifelse(date == "nov_20", "11", 
+                                                                                                              ifelse(date == "feb_21", "2", 
+                                                                                                                     ifelse(date == "apr_21", "4", 
+                                                                                                                            ifelse(date == "july_21", "7", "no")))))
+cleansampledata$month <- as.numeric(cleansampledata$month)
+cleansampledata$year <- as.numeric(cleansampledata$year)
+# try joining again
+joindata <- left_join(cleansampledata, cleanuowndata, by = c("site", "month", "year"))
+
+# clean up joined dataset
+joindata <- joindata %>% select(-"day",
+                                -"WS", 
+                                -"ID")
+# save combined data as RDS
+save_data_location <- here::here("data", "processed_data", "combodata.rds")
+
+saveRDS(joindata, file = save_data_location)
+
+```
+

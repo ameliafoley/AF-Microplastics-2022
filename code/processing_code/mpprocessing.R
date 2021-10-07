@@ -14,7 +14,7 @@ library(tidyverse)
 data_location1 <- here::here("data","raw_data","mpdata_ALL.xlsx")
 data_location2 <- here::here("data","raw_data","uown 8.26.xlsx")
 
-#load data. 
+#load microplastics data. 
 rawdata1 <- read_excel(data_location1)
 rawdata2 <- read_excel(data_location2)
 
@@ -117,4 +117,20 @@ saveRDS(cleansampledata, file = save_data_location)
 saveRDS(volunteer, file = save_data_location1)
 saveRDS(controldata, file = save_data_location2)
 
+# Here, I'll also load some data we'll want to look at later. The csv file being 
+# imported contains the coordinates for Athens' three water reclamation facilities (WRF)
+# Since WRF efflunet is a hypothesized predictor of microplastic levels, we'll examine
+# this later in the exploratory analysis. 
 
+# load Water Reclamation Facility location data
+
+#path to data
+data_location3 <- here::here("data","raw_data","wrflocation.csv")
+
+#load WRF data
+wrflocation <- read.csv(data_location3)
+
+#save data as RDS
+save_data_location3 <- here::here("data", "processed_data", "wrflocation.rds")
+
+saveRDS(wrflocation, file = save_data_location3)
