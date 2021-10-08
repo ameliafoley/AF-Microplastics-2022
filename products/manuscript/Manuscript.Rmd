@@ -1,7 +1,7 @@
 ---
-title: "Example Manuscript Template for a Data Analysis Project"
-subtitle: ""
-author: Andreas Handel
+title: "Microplastics in the Urban Environment"
+subtitle: "Exploratory Study of Freshwater Microplastics in Athens, GA"
+author: Amelia M. Foley
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: article
@@ -11,11 +11,11 @@ output:
     number_sections: true
   bookdown::html_document2: 
     toc: false
-bibliography: ../references.bib
+#bibliography: library.bib #I am having trouble with the bib file (error message: pandoc error 83 file not found). Removing this line for now so that Manuscript will knit. Will continue to troubleshoot and fix bib formatting. 
 csl: ../apa.csl
 ---
 
-The structure below is a possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed.
+This document will be my final manuscript for the MADA project. I am keeping these draft sections for structure now, until I edit them later. 
 
 
 # Summary/Abstract
@@ -24,8 +24,10 @@ _Write a summary of your project._
 
 # Introduction 
 
-## General Background Information
-_Provide enough background on your topic that others can understand the why and how of your analysis_ 
+In the past two decades, the study of microplastics has expanded exponentially. Since the earliest paper mentioning small plastic particles in the ocean was published in the 1970s, before the term “microplastics” even existed, researchers across the globe have quantified microplastic particle levels in both marine and freshwater environments, assessed potential drivers and predictors of microplastic pollution, examined the presence of microplastics in the food chain, and explored the potential human health impacts of ingested microplastics [@Carpenter1972]. Though the body of research on microplastics has grown in recent years, many knowledge gaps remain regarding this pollutant. The term microplastics was first coined in 2004, and today microplastics are defined as plastic particles smaller in size than 5 mm, though some studies examine particles as large as 20 mm [@Thompson2004]. Years of sampling, experimentation, and progress in research methods tell researchers that microplastics are a persistent class of pollutant and are found worldwide in a diverse assemblage of forms [@Barboza2018].
+
+Through decades of research, the scientific community proves that microplastics are ubiquitous, having identified microplastics in oceans, rivers, lakes, and other water bodies across the globe, including remote mountain lakes, the bottom of the ocean, and in ocean sediments offshore of Antarctica [@Free2014][@Waller2017][@Peng2018]. Modeling of current and future plastic production and pollution indicates that plastics are so pervasive that they have been considered as a geological indicator of the proposed Anthropocene era [@Zalasiewicz2016]. These models also suggest that microplastic concentrations will only increase in the future [@Geyer2017][@Barboza 2018][@Prokic2019][@Evereart2018]. In a 2018 paper, Barboza and collaborators state that the increase in environmental microplastics is particularly concerning due to the contaminants’ small size, the limited technology for quantifying their presence, and their potential for adversely affecting both marine biota and humans [@Barboza2018]. Further, research shows that microplastic pollution is largely due to land-based sources; ocean-based sources such as commercial fishing, vessels, and other activities, contribute only 20% of the total plastic debris, while terrestrial activity contributes the other 80% of pollution in the marine environment [@Andrady2011][@Li2018]. Microplastics with various terrestrial origins mainly enter the marine environment via rivers, releasing most microplastics to the ocean and retaining some in freshwater systems [@Free2014][@Li2018][@Browne2010][@Lebreton2017]. However, a majority of microplastics research to date has focused on marine settings rather than freshwater, indicating that more studies are required in this area [@Besseling2018][@Dris2015]. Examining freshwater systems as the dominant source of microplastics will lead to a better overall understanding of microplastics pollution input and therefore insight into the scale of the issue and mitigation strategies [@Lebreton2017].
+
 
 ## Description of data and data source
 _Describe what the data is, what it contains, where it is from, etc. Eventually this might be part of a methods section._
@@ -59,15 +61,17 @@ Table \@ref(tab:summarytable) shows a table summarizing the data.
 
 
 ```{r summarytable,  echo=FALSE}
-resulttable=readRDS("../../results/summarytable.rds")
-knitr::kable(resulttable, caption = 'Data summary table.')
+#saving template for formatting later on
+
+#resulttable=readRDS("../../results/summarytable.rds")
+#knitr::kable(resulttable, caption = 'Data summary table.')
 ```
 
 
 Figure \@ref(fig:resultfigure) shows a scatterplot figure produced by one of the R scripts.
 
 ```{r resultfigure,  fig.cap='Analysis figure.', echo=FALSE}
-knitr::include_graphics("../../results/resultfigure.png")
+#knitr::include_graphics("../../results/resultfigure.png")
 ```
 
 
@@ -78,8 +82,8 @@ _Use one or several suitable statistical/machine learning methods to analyze you
 Example table \@ref(tab:resulttable) shows a table summarizing a linear model fit.
 
 ```{r resulttable,  echo=FALSE}
-resulttable=readRDS("../../results/resulttable.rds")
-knitr::kable(resulttable, caption = 'Linear model fit table.')
+#resulttable=readRDS("../../results/resulttable.rds")
+#knitr::kable(resulttable, caption = 'Linear model fit table.')
 ```
 
 
@@ -93,12 +97,6 @@ _Discuss what you perceive as strengths and limitations of your analysis._
 
 ## Conclusions
 _What are the main take-home messages?_
-
-_Include citations in your Rmd file using bibtex, the list of references will automatically be placed at the end_
-
-This paper [@Leek2015a] discusses types of analyses. 
-
-Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal [are available](https://www.zotero.org/styles). You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like, I just used the generic word `references.bib` but giving it a more descriptive name is probably better.
 
 
 # References

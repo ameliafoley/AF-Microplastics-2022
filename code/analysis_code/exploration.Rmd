@@ -40,9 +40,99 @@ summary(mpdata)
 
 # view particles/L by season
 
-mpdata %>% ggplot(aes(x = month, y = particles_l)) + geom_boxplot(aes()) + labs(title = "Microplastic Concentration")
+mpdata %>% ggplot(aes(x = date, y = particles_l)) + geom_boxplot(aes()) + labs(title = "Microplastic Concentration")
 
 
 ```
  
+ Here, we can see that the levels of microplastics are similar, from a wide lens, through the four sample dates. There are a few outliers - it would be interesting to look at the data when excluding outliers. I'll have to look into what the best practice for that is. Also, for final products, I'll want to reorder the dates so that Nov 2020 is listed first (chronologically), and I will relabel everything to make it neater as well. 
  
+ 
+ For all samples, let's compare microplastic level and local population. 
+ 
+# MP level vs population
+```{r}
+mpdata %>% ggplot(aes(x = population, y = particles_l)) + geom_point()
+```
+
+I'm not seeing any obvious relationships here. Also, population values are appearing discrete rather than continous since there are a limited number of zip codes in the study area, and population was based on zip code. 
+
+```{r}
+mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1))
+```
+
+
+Something weird is giong on with the values for e.coli.cfu. 
+
+```{r}
+class(mpdata$e.coli.cfu)
+```
+
+It looks like that ended up saved as a character instead of integer. Let's convert. 
+# covert character to numeric
+```{r}
+mpdata <- mpdata %>% mutate(e.coli.cfu = as.numeric(e.coli.cfu))
+class(mpdata$e.coli.cfu)
+```
+
+# try plot again
+```{r}
+mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1))
+```
+
+Again, no obvious relationships here. How about if we looked with a logarithmic scale? 
+
+```{r}
+mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1)) + scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10')
+```
+
+Note: missing values are for e.coli.cfu for July 2021 sampling. These values should be available for comparison soon. 
+
+Let's look at overall distribution of MP levels
+```{r}
+mpdata %>% ggplot(aes(x = particles_l)) + geom_histogram()
+```
+
+
+We have some large outliers that make it harder to view the exact distribution of the lower values. Let's filter out the outliers for a moment. 
+
+```{r}
+mpdata %>% filter(particles_l < 400) %>% ggplot(aes(x = particles_l)) + geom_histogram()
+```
+
+We see that most levels fall below 100 particles per liter. 
+
+```{r}
+summary(mpdata$particles_l)
+```
+
+These summary statistics give us a little more descriptive information about the dataset. The other variables that I wanted to look at particles per liter alongside were land cover. The process for looking at land cover will be a little more complicated - there a key for variable names corresponding to land types that I need to look closer at, and I am also not sure if the scale of the land cover data will be appropriate. Currently, it is at the census FIPS code level (approximately county level). Since most of these samples occur within that same area, we don't have other reference areas for comparison. I'll have to think about what I can do with this information. 
+
+I also wanted to look at proximity of sample sites to water reclamation facilities (WRFs). Let's try that. 
+# load WRF location
+```{r}
+#path to data
+wrfdata_location <- here::here("data","processed_data","wrflocation.rds")
+
+#load data
+wrflocation <- readRDS(wrfdata_location)
+```
+
+Eventually, I would like to be able to view this information on a map - where WRFs are labelled, and samples sites are color-coded by density of microplastics found. For now, let's see if we can calculate distance otherwise. 
+
+```{r}
+library(geodist)
+
+#calculate distance between sample coordinates and WRF location
+wrfdistance <- geodist_vec(mpdata$long, mpdata$lat, wrflocation$long, wrflocation$lat)
+```
+
+I think the product we have here is a matrix of the distance of each sample site from each of the three WRFs, in the order that they appear in the WRF data (Cedar Creek, North Oconee, Middle Oconee). But, the labelling of the data is not super clear, so I need to verify this to be sure. 
+
+
+```{r}
+test <- mpdata %>% mutate(wrfdist = geodist_vec(mpdata$long, mpdata$lat, wrflocation$long, wrflocation$lat))
+```
+
+This produced another column like I wanted, but I don't know which WRF the distance was calculated for. Maybe I need to save WRF locations as individual lat and long values, and produce three new columns that way? However, I am not sure what the final product would look like if we do that, because a sample site could be closely associated with one WRF but much further from another one. Maybe I need to narrow this down to proximity to the nearest WRF, so that each sample site is only associated with the distance to ONE WRF, not three. 
