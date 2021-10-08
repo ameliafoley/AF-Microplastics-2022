@@ -1,0 +1,48 @@
+---
+title: "exploration"
+output: html_document
+---
+
+For this project, I began with microplastic count data for various sample sites, variables including site, watershed, latitude, longitude, and a_count and b_count. So far, I have obtained the following additional data: 
+
+ - local land cover based on coordinates converted to census FIPS codes, using NGIS data
+ - bacterial data from corresponding UOWN sample dates/sites
+ - location population levels by zip code, converted from lat/long and joined with census data. 
+ 
+In this document, I will explore relationships between some of these variables. 
+
+Quantities of main interest: 
+ - particles per liter of microplastics
+ - season/sample date
+ - population level
+ - proximity to water reclamation facility effluent
+ - bacteria levels at corresponding samples sites/dates
+ 
+# load packages and data
+```{r}
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+library(ggplot2)
+
+
+#path to data
+data_location <- here::here("data","processed_data","popdata.rds")
+
+#load data
+mpdata <- readRDS(data_location)
+
+```
+
+# take a look at data
+```{r}
+summary(mpdata)
+
+# view particles/L by season
+
+mpdata %>% ggplot(aes(x = month, y = particles_l)) + geom_boxplot(aes()) + labs(title = "Microplastic Concentration")
+
+
+```
+ 
+ 

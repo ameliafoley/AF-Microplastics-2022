@@ -1,0 +1,62 @@
+---
+title: "censusprocessing"
+output: html_document
+---
+
+At this point, I have written a few processing files loading the microplastics data, land cover/use data, and UOWN data for this project. I'd also like to look at small area population. I think I can achieve this by looking at population by zip code in Athens Clarke County, which is available from the US Census. My goal is to convert the latitude and longitude coordinates for each sample site into a zip code, and then examine whether microplastic levels vary based on local population size/population density. 
+
+The data will come from the American Community Survey 5-year estimate 2019, and I will plan to use API. To convert sample coordinates to comparable zip codes, I can use the `tidygeocoder` package. 
+
+Citation for zipcode population data (saving for later): 
+United States Census Bureau. B01001 SEX BY AGE, 2019 American Community Survey 5-Year Estimates. U.S. Census Bureau, American Community Survey Office. Web. 10 December 2020. http://www.census.gov/.
+
+Downloaded at: https://www.georgia-demographics.com/zip_codes_by_population
+
+```{r}
+#load  packages
+library(readxl) #for loading Excel files
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+library(revgeo) #for reverse geocoding coordinates to zipcode
+
+#path to data
+data_location <- here::here("data","raw_data","zippop.xlsx")
+
+#load population data. 
+zippop <- read_excel(data_location)
+
+#load MP data
+data_location1 <- here::here("data","processed_data","combodata.rds")
+
+#load data. 
+combodata <- readRDS(data_location1)
+```
+
+# convert lat long to zip
+```{r}
+
+# use Bing API to convert coordinates to corresponding zip code
+zip<-revgeo(longitude=combodata$long, 
+                            latitude=combodata$lat, 
+                            provider = 'bing', API = 'AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ', output="frame", item = "zip")
+
+# add zip variable to combodata
+combodata <- combodata %>% mutate(revgeo(longitude=combodata$long, 
+                            latitude=combodata$lat, 
+                            provider = 'bing', API = 'AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ', output="frame", item = "zip") %>%
+                              select("zip"))
+```
+
+# add population levels based on zip code
+```{r}
+popdata <- left_join(combodata, zippop, by = c("zip" = "zipcode"))
+
+
+#save data as RDS
+popdata_loc <- here::here("data", "processed_data", "popdata.rds")
+
+saveRDS(popdata, file = popdata_loc)
+
+```
+
