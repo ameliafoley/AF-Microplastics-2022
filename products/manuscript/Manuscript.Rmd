@@ -11,7 +11,7 @@ output:
     number_sections: true
   bookdown::html_document2: 
     toc: false
-#bibliography: library.bib #I am having trouble with the bib file (error message: pandoc error 83 file not found). Removing this line for now so that Manuscript will knit. Will continue to troubleshoot and fix bib formatting. 
+bibliography: here::here("products", "library.bib") #I am having trouble with the bib file (error message: pandoc error 83 file not found). Removing this line for now so that Manuscript will knit. Will continue to troubleshoot and fix bib formatting. 
 csl: ../apa.csl
 ---
 

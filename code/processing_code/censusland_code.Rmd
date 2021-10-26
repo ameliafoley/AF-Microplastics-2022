@@ -72,11 +72,21 @@ landcover$fips = paste0(landcover$state_fip, landcover$county_fip)
 landcover <- landcover %>%
   select(fips, everything()) # moving fips column to far left of data set
 
+#clean dataset by selecting only data for the state of Georgia
+landcover <- landcover %>%
+  filter(state_fip == "13")
+
+#get rid of the 4th and the 8th zero in GISJOIN to make compatible with FIPS codes for samples + population count
+landcover = landcover %>% mutate(FIPS = paste(state_fip, county_fip, substring(landcover$GISJOIN, 9, 14), sep = "")) %>% relocate(FIPS)
+
 #filter to clean data set
-landcoverclean = landcover %>% select(-GISJOIN, -state_fip, -county_fip, -OID)
+landcoverclean = landcover %>% select(-GISJOIN, -state_fip, -county_fip, -OID, fips)
 
-athensfips <- c("13219", "13059")
-athensland <- filter(landcoverclean, fips %in% athensfips) 
+#Now we have landcover data in a form that is compatible with our sample site data (using small geography census info). Let's join datasets to create a dataset with sample site info and land cover info
+tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
+athensland <- left_join(tractpopdata, landcoverclean, by = "FIPS")
 
+#save as RDS
+saveRDS(athensland, file = here("data", "processed_data", "athensland.rds"))
 ```
 

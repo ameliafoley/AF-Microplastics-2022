@@ -63,3 +63,83 @@ saveRDS(popdata, file = popdata_loc)
 
 ```
 
+Update 10/25/21
+
+I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let's try to use FIPS codes (which include tract info) to obtain population data that might be more informative. 
+# Converting coordinates to FIPS
+```{r}
+#create function
+latlong2fips <- function(latitude, longitude) {
+  url <- "https://geo.fcc.gov/api/census/block/find?format=json&latitude=%f&longitude=%f"
+  url <- sprintf(url, latitude, longitude)
+  json <- RCurl::getURL(url)
+  json <- RJSONIO::fromJSON(json)
+  as.character(json$Block['FIPS'])
+}
+#vectorize so function will take more than one argument
+latlong2fips_vec <- Vectorize(latlong2fips, vectorize.args = "latitude", "longitude")
+
+fips <- popdata %>% rowwise() %>% mutate(FIPS = latlong2fips_vec(lat, long))
+
+saveRDS(fips, "fips.RDS")
+```
+
+# FIPS to census tract population
+```{r}
+library(tidycensus)
+#tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE)
+get_decennial("block", state = Georgia, variables = population, year = 2019)
+```
+
+Here, we receive an error message suggesting to use NHGIS data since the most recent small census geography data is not available through `get_decennial()`.
+
+# Using NHGIS data for more recent block-level population counts
+```{r}
+#Downloaded data from http://NHGIS.org
+install.packages("ipumsr")
+library(ipumsr)
+
+#read in census tract level population data
+tract <- read.csv(here("data","raw_data","nhgis0001_csv", "nhgis0001_ds244_20195_tract.csv"))
+
+#clean up dataset to remove unneeded columns/variables
+tract <- tract %>% filter(STATE == "Georgia") %>% select(1:3, 6:9, 12, 40, 43:46)
+
+#Now, we have the FIPS codes for each sample site (down to the tract/block level), and we have population counts by FIPS code. 
+
+#First, we need to remove the last four digits of the FIPS code in the fips dataset so that it will correspond with the #FIPS code in the tract dataset. We'll also need to remove the G from the beginning of the tract FIPS codes. 
+
+
+#combine individual codes for state, county, tract to get long form FIPS code
+a <- tract %>% mutate(FIPS = paste(STATEA, COUNTYA, sep = "")) %>%
+  mutate(FIPS = paste(FIPS, TRACTA, sep = "0"))
+
+#keep only the variables we need, FIPS code and population size (ALUBE001)
+a <- a %>% select("FIPS", "ALUBE001")
+#remove last four digits from fips codes associates with samples, so that they coordinate with population census tract FIPS codes
+b <- fips %>% mutate(FIPS = (substr(FIPS,1,nchar(FIPS)-4)))
+#combine datasets by FIPS code, so that population size is added to our main dataset based on corresponding FIPS code
+blockpop <- left_join(b, a, by = "FIPS")
+
+#We still have some missing values, but when I search for the FIPS code that are missing population levels, I am able to find them in the tract dataset. It looks like the FIPS code/GEOID are sometimes the same but sometimes differ by one digit (usually a zero inserted in the middle of the string somewhere). Let's adjust the GEOID variable to make it comparable to the FIPS codes we are still missing population data for, and then we'll join the datasets again to try to fill in missing values. 
+
+#let's try GEOID minus first 7 digits
+tract$GEOID <- gsub("^.{0,7}", "", tract$GEOID) 
+#selecting only the variables we want to add in our final combination dataset
+tractpop <- tract %>% select("GEOID", "ALUBE001")
+#joining based on FIPS code to fill in missing population data
+c <- left_join(blockpop, tractpop, by = c("FIPS" = "GEOID"))
+
+#This last attempt was successful and we now have a column that gives us the census tract level population count, with no missing values. We no longer need the first column, or the zip code and zip code population data that we looked at initially. Let's clean up this dataset for further exploration
+
+#Remove first ALUBE001 column and zip, population columns
+tractpopdata <- c %>% select(-"ALUBE001.x", -"zip", -"population")
+tractpopdata <- rename(tractpopdata, "population" = "ALUBE001.y")
+
+
+#save as RDS
+saveRDS(tractpopdata, file = here("data", "processed_data", "tractpopdata.rds"))
+
+```
+
+
