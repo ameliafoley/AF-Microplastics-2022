@@ -81,7 +81,32 @@ landcover = landcover %>% mutate(FIPS = paste(state_fip, county_fip, substring(l
 
 #filter to clean data set
 landcoverclean = landcover %>% select(-GISJOIN, -state_fip, -county_fip, -OID, fips)
+#remove empty variables and rename variables according to key described in readme file for raw NHGIS landcover data
+landcoverclean <- landcoverclean %>% select(-(4:67)) #remove variable columns from years 2001 and 2006, keeping only 2011 data 
+landcoverclean <- landcoverclean %>% rename(open_water = AREA11_2011,
+                                            perennial_ice = AREA12_2011, 
+                                            developed_open = AREA21_2011, 
+                                            developed_low = AREA22_2011, 
+                                            developed_medium = AREA23_2011, 
+                                            developed_high = AREA24_2011, 
+                                            barren_land = AREA31_2011, 
+                                            deciduous_forest = AREA41_2011, 
+                                            evergreen_forest = AREA42_2011, 
+                                            mixed_forest = AREA43_2011,
+                                            shrub = AREA52_2011, 
+                                            grassland = AREA71_2011, 
+                                            pasture = AREA81_2011, 
+                                            crops = AREA82_2011, 
+                                            woody_wetlands = AREA90_2011, 
+                                            herb_wetlands = AREA95_2011) 
+landcoverclean <- landcoverclean %>% select(-(20:35), 
+                                            -"perennial_ice") #removing empty perennial ice column, removing proporation variables (keeping area values rather than proportions. we have the total area and can recalculate proportion later if needed)
+                                          
+#Based on the NAs in the perennial_ice columns and knowing the context/region of the data, I am thinking that the other NA values for certain land cover types simply indicate that there is no land cover of that type in the area - therefore, these values are essentially zero. Let's replace NA values with zeroes so that we are working with complete (not missing) data. 
 
+landcoverclean[is.na(landcoverclean)] <- 0 #replace NA with 0
+                                            
+                                      
 #Now we have landcover data in a form that is compatible with our sample site data (using small geography census info). Let's join datasets to create a dataset with sample site info and land cover info
 tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
 athensland <- left_join(tractpopdata, landcoverclean, by = "FIPS")

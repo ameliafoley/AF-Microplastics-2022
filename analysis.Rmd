@@ -7,3 +7,76 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#load packages and data
+```{r}
+library(ggplot2) #for plotting
+library(broom) #for cleaning up output from lm()
+library(here) #for data loading/saving
+library(tidymodels) #for modeling
+
+data <- readRDS(here("data", "processed_data", "athensland.rds"))
+```
+
+# fit linear model to continuous outcome (particles_l)
+```{r}
+#attempt to visualize data
+#look at particles per L vs population
+ggplot(data, aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm)
+```
+# linear regression
+```{r}
+#linear regression model specification set up
+lm_mod <- linear_reg() %>% set_engine("lm")
+#estimating/training linear model
+lm_fit1 <- lm_mod %>% fit(particles_l ~ ., data = data)
+#view summary of fit
+tidy(lm_fit1)
+```
+# model evaluation
+```{r}
+#split into test and train
+#set seed for reproducible analysis
+set.seed(222)
+#subset 3/4 of data as training set
+data_split <- initial_split(data, prop = 3/4)
+
+#save sets as data frames
+train_data <- training(data_split)
+test_data <- testing(data_split)
+```
+
+# recipe to fit continuous outcome to all predictors
+```{r}
+#recipe for particles per liter, all predictors
+mp_rec <- 
+  recipe(particles_l ~ ., data = train_data)
+
+#linear regression model workflow set up
+mp_wflow <- 
+  workflow() %>% add_model(lm_mod) %>% add_recipe(mp_rec)
+
+#use workflow to prepare recipe and train model with predictors
+mp_fit <- 
+  mp_wflow %>% fit(data = train_data)
+
+#extract model coefficient
+mp_fit %>% extract_fit_parsnip() %>% tidy()
+```
+# evaluate model with ROC and ROC-AUC
+```{r}
+#use trained workflow to predict with test data
+test_data <- test_data[-c(20:28),]
+predict(mp_fit, test_data)
+
+#include probabilities
+mp_aug <- augment(mp_fit, test_data)
+
+#generate ROC curve
+mp_aug %>% 
+  roc_curve(truth = particles.l, .pred) %>% autoplot()
+
+#estimate area under the curve
+mp_aug %>% roc_auc(truth = particles_l, .pred)
+```
+
+Here, I am running into an issue since july_21 data is still missing. Hopefully we'll get that from Megan soon. For now, let's try filtering it out. 
