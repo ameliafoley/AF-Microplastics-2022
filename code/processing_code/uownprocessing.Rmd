@@ -42,6 +42,9 @@ cleanuowndata <- uowndata %>% select(-"ecoli.method.known",
                                      -"pH") %>%
   rename(site=WSID)
 
+#save e.coli.cfu as numeric instead of character
+cleanuowndata <- cleanuowndata %>% mutate(e.coli.cfu = as.numeric(e.coli.cfu))
+class(cleanuowndata$e.coli.cfu)
 ```
 
 # Save UOWN data alone

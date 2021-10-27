@@ -62,6 +62,9 @@ mp_fit <-
 #extract model coefficient
 mp_fit %>% extract_fit_parsnip() %>% tidy()
 ```
+
+Here, where model coefficient are extracted, the terms are individual sites rather than the different variable predictors we want to look like, unlike in last weeks exercise. Maybe I need to go back and remove the variables that aren't going to be helpful predictors (ex: site name) 
+
 # evaluate model with ROC and ROC-AUC
 ```{r}
 #use trained workflow to predict with test data
@@ -71,12 +74,19 @@ predict(mp_fit, test_data)
 #include probabilities
 mp_aug <- augment(mp_fit, test_data)
 
-#generate ROC curve
-mp_aug %>% 
-  roc_curve(truth = particles.l, .pred) %>% autoplot()
+#get RMSE for test data
+mp_aug %>% rmse(truth = particles_l, .pred)
 
-#estimate area under the curve
-mp_aug %>% roc_auc(truth = particles_l, .pred)
 ```
 
+Why are there so many rows resulting? When we did the analysis last week, only one row was the result, and it was just rmse and provided a value around 1. 
+
 Here, I am running into an issue since july_21 data is still missing. Hopefully we'll get that from Megan soon. For now, let's try filtering it out. 
+
+The error message about levels is indicating that these results appear in the test data but not the train data. However, this values should be continuous and not categorical. let's check on the class of the variable to see what's going on. 
+
+```{r}
+class(test_data$e.coli.cfu)
+```
+
+Okay, e.coli.cfu has been saved as a character rather than numeric/double. I encountered this issue earlier in exploration but it looks like I neglected to save an updated version of the dataset. Let's go back to the processing code and adjust this. 
