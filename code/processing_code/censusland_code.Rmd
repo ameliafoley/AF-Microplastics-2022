@@ -18,11 +18,6 @@ library(censusapi)
 library(rerddap)
 library(RCurl)
 
-#path to data
-data_location <- here::here("data","processed_data","cleansampledata.rds")
-
-#load data. 
-data <- readRDS(data_location)
 ```
 
 ##Load Census API (load only once)
@@ -110,6 +105,14 @@ landcoverclean[is.na(landcoverclean)] <- 0 #replace NA with 0
 #Now we have landcover data in a form that is compatible with our sample site data (using small geography census info). Let's join datasets to create a dataset with sample site info and land cover info
 tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
 athensland <- left_join(tractpopdata, landcoverclean, by = "FIPS")
+
+#cleanup resultant dataset
+athensland <- athensland %>% select(-"fips", 
+                              -"FIPS", 
+                              -"AREA", 
+                              -"quarter", 
+                              -"month",
+                              -"year")
 
 #save as RDS
 saveRDS(athensland, file = here("data", "processed_data", "athensland.rds"))

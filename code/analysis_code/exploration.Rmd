@@ -67,25 +67,8 @@ ggsave(filename = figure_file, plot=p1)
 
 I'm not seeing any obvious relationships here. Also, population values are appearing discrete rather than continous since there are a limited number of zip codes in the study area, and population was based on zip code. 
 
-```{r}
-mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1))
-```
 
-
-Something weird is giong on with the values for e.coli.cfu. 
-
-```{r}
-class(mpdata$e.coli.cfu)
-```
-
-It looks like that ended up saved as a character instead of integer. Let's convert. 
-# covert character to numeric
-```{r}
-mpdata <- mpdata %>% mutate(e.coli.cfu = as.numeric(e.coli.cfu))
-class(mpdata$e.coli.cfu)
-```
-
-# try plot again
+# plot e.coli.cfu vs particles_l
 ```{r}
 p3 <- mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1))
 
@@ -183,12 +166,12 @@ mpdata <- mpdata %>% mutate(miwrf = geodist_vec(mpdata$long, mpdata$lat, middleo
 #Since I only care about the proximity to the closest WRF, my next task is to write code that creates a new variable returning only the lowest value out of ccwrf, nowrf, and miwrf for each sample site. 
 
 #subset data into just distance from each WRF
-wrf <- mpdata %>% select("ccwrf", "nowrf", "miwrf") 
+wrf <- mpdata %>% select("ccwrf", "nowrf", "miwrf", "site", "date") 
 #find minimum distance to any WRF out of all three
 val <- do.call(pmin, c(wrf, na.rm = TRUE)) 
 minwrf <- transform(wrf, min=val, minCol = names(wrf)[max.col(wrf == val, 'first')])
 
-#minwrf contains the variable min, which tells us the distance from the sample site to the nearest WRF. This is all of the information that we need, so no we will re-join to the original DF
+#minwrf contains the variable min, which tells us the distance from the sample site to the nearest WRF. This is all of the information that we need, so now we will re-join to the original DF
 mpwrfdata <- left_join(mpdata, minwrf)
 
 #remove variables we won't need anymore

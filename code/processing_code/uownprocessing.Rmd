@@ -25,6 +25,21 @@ uowndata <- read.csv(data_location1)
 glimpse(uowndata)
 ```
 
+# Merging mass UOWN dataset and July data, which was received later (10/27/21)
+```{r}
+july <- read.csv(here("data", "raw_data", "uown_summer2021_qtrly.csv"))
+glimpse(july)
+#The july data also contains 17 columns, just like the mass dataset. This indicates that these datasets should be easy to merge. 
+#adjusting class of some variables so that they are compatible between these two datasets before joining
+july <- july %>% mutate(ID = as.character(ID), 
+               pH = as.numeric(pH)) 
+#adjust class of e.coli.cfu from character to numeric to join datasets (and to work with later in analysis)               
+uowndata <- uowndata %>% mutate(e.coli.cfu = as.numeric(e.coli.cfu))
+
+uowndata <- full_join(uowndata, july, all = TRUE)
+```
+
+
 # Subsetting UOWN data
 ```{r}
 uowndata <- uowndata %>% filter((year == 2020 & month == 11) | (year == 2021 & quarter == 1) | (year == 2021 & quarter == 2 )| (year == 2021 & quarter == 3))
@@ -42,9 +57,6 @@ cleanuowndata <- uowndata %>% select(-"ecoli.method.known",
                                      -"pH") %>%
   rename(site=WSID)
 
-#save e.coli.cfu as numeric instead of character
-cleanuowndata <- cleanuowndata %>% mutate(e.coli.cfu = as.numeric(e.coli.cfu))
-class(cleanuowndata$e.coli.cfu)
 ```
 
 # Save UOWN data alone

@@ -2,7 +2,8 @@ The mpprocessing.R is the initial code to load, clean, and wrangle the raw data.
 
 #Order of scripts:
 1. mpprocessing.R
-2. censusland_code.Rmd
-3. uownprocessing.Rmd
-4. censusprocessing.Rmd
+2. uownprocessing.Rmd
+3. censusprocessing.Rmd
+4. censusland_code.Rmd
 5. exploration.Rmd
+6. analysis.Rmd

@@ -84,14 +84,8 @@ fips <- popdata %>% rowwise() %>% mutate(FIPS = latlong2fips_vec(lat, long))
 saveRDS(fips, "fips.RDS")
 ```
 
-# FIPS to census tract population
-```{r}
-library(tidycensus)
-#tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE)
-get_decennial("block", state = Georgia, variables = population, year = 2019)
-```
 
-Here, we receive an error message suggesting to use NHGIS data since the most recent small census geography data is not available through `get_decennial()`.
+Here, after attemping to use `get_decennial()` we receive an error message suggesting to use NHGIS data since the most recent small census geography data is not available through `get_decennial()`.
 
 # Using NHGIS data for more recent block-level population counts
 ```{r}

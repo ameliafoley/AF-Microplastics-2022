@@ -162,6 +162,7 @@ mp_aug %>% rmse(truth = particles_l, .pred)
 Why are there so many rows resulting? When we did the analysis last week, only one row was the result, and it was just rmse and provided a value around 1. 
 
 
+
 #trying model evaluation with SUBSET
 ```{r}
 
