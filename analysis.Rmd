@@ -21,9 +21,35 @@ data <- readRDS(here("data", "processed_data", "mpwrfcombo.rds"))
 ```{r}
 #attempt to visualize data
 #look at particles per L vs population
-ggplot(data, aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm)
+ggplot(data, aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Particles/Liter")
 ```
 
+# particles per liter vs population with outliers filtered out
+```{r}
+#attempt to visualize data
+#look at particles per L vs population
+data %>% filter(particles_l < 750) %>% ggplot(aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Particles/Liter")
+```
+
+
+# fit linear model to continuous outcome (particles_l) with log transformation
+```{r}
+#attempt to visualize data
+#look at particles per L vs population
+ggplot(data, aes(x = population, y = particles_l)) + geom_point() +
+  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Log(Particles/Liter)")
+```
+
+# visualize particles vs e.coli.cfu 
+```{r}
+ggplot(data, aes(x = e.coli.cfu, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. E. coli CFU", x = "CFU/mL", y = "Particles/Liter")
+```
+
+# particles per liter vs e.coli.cfu with log transformation
+```{r}
+ggplot(data, aes(x = e.coli.cfu, y = particles_l)) + geom_point() + scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. E. coli CFU", x = "Log(CFU/mL)", y = "Log(Particles/Liter)")
+```
 
 
 # linear regression
@@ -146,7 +172,7 @@ mp_fit %>% extract_fit_parsnip() %>% tidy()
 
 Here, we see site names come up first, even though we know site names are not going to be good predictors of microplastic levels. I need to go back and remove the variables that aren't going to be helpful predictors (ex: site name) 
 
-# evaluate model with ROC and ROC-AUC
+# evaluate model with RMSE
 ```{r}
 #use trained workflow to predict with test data
 predict(mp_fit, test_data)

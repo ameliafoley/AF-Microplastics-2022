@@ -24,29 +24,36 @@ library(dplyr) #for data processing
 library(here) #to set paths
 library(tidyverse)
 library(ggplot2)
-
+library(geodist) #to calculate distance from sample site to each water reclamation facility
 
 #path to data
-data_location <- here::here("data","processed_data","popdata.rds")
+data_location <- here::here("data","processed_data","mpwrfcombo.rds")
 
 #load data
 mpdata <- readRDS(data_location)
 
 ```
 
-# take a look at data
+# MP concentration by season
 ```{r}
 summary(mpdata)
 
 # view particles/L by season
 
-p1 <- mpdata %>% ggplot(aes(x = date, y = particles_l)) + geom_boxplot(aes()) + labs(title = "Microplastic Concentration")
+mpdata$date <- factor(mpdata$date , levels=c("nov_20", "feb_21", "apr_21", "july_21"))
+
+p1 <- mpdata %>% ggplot(aes(x = date, y = particles_l)) + 
+  geom_boxplot(aes()) + 
+  labs(title = "Microplastic Concentration by Sample Date", x = "Date", y = "Particles/Liter") + 
+  scale_x_discrete(labels=c("Fall 2020",
+                            "Winter 2021",
+                            "Spring 2021",
+                            "Summer 2021"))
 
 plot(p1)
 
 #save figure
-figure_file = here("results","concentrationbydate.png")
-ggsave(filename = figure_file, plot=p1)
+ggsave(filename = here("results","concentrationbydate.png"), plot=p1)
 ```
  
 Here, we can see that the levels of microplastics are similar, from a wide lens, through the four sample dates. There are a few outliers - it would be interesting to look at the data when excluding outliers. I'll have to look into what the best practice for that is. Also, for final products, I'll want to reorder the dates so that Nov 2020 is listed first (chronologically), and I will relabel everything to make it neater as well. 
@@ -56,167 +63,131 @@ Here, we can see that the levels of microplastics are similar, from a wide lens,
  
 # MP level vs population
 ```{r}
-p2 <- mpdata %>% ggplot(aes(x = population, y = particles_l)) + geom_point()
+p2 <- mpdata %>% ggplot(aes(x = population, y = particles_l)) + geom_point() +
+  labs(title = "Microplastic Concentration vs Population", x = "Population", y = "Particles/Liter")
 
 plot(p2)
 
 #save figure
-figure_file = here("results","particlesvpop.png")
-ggsave(filename = figure_file, plot=p1)
+ggsave(filename = here("results","particlesvpop.png"), plot=p2)
 ```
 
 I'm not seeing any obvious relationships here. Also, population values are appearing discrete rather than continous since there are a limited number of zip codes in the study area, and population was based on zip code. 
 
+# particles vs population with log transformation
+```{r}
+p3 <- mpdata %>% ggplot(aes(x = population, y = particles_l)) + 
+  geom_point() + 
+  scale_y_continuous(trans='log10') +
+  labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Log(Particles/Liter)")
+
+plot(p3)
+#save figure
+figure_file = here("results","logparticlesvpop.png")
+ggsave(filename = figure_file, plot=p3)
+```
+
 
 # plot e.coli.cfu vs particles_l
 ```{r}
-p3 <- mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1))
+p4 <- mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + 
+  geom_point() + 
+  theme(axis.text.x = element_text(angle = 90, hjust=1)) +
+  labs(title = "Microplastic Concentration vs. E. coli CFU", x = "CFU", y = "Particles/Liter")
 
-plot(p3)
+plot(p4)
 
 #save figure
-figure_file = here("results","mpvbacteria.png")
-ggsave(filename = figure_file, plot=p3)
+figure_file = here("results","mpvcfu.png")
+ggsave(filename = figure_file, plot=p4)
 ```
 
 Again, no obvious relationships here. How about if we looked with a logarithmic scale? 
 
 ```{r}
-p4 <- mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + geom_point() + theme(axis.text.x = element_text(angle = 90, hjust=1)) + scale_x_continuous(trans='log10') +
-  scale_y_continuous(trans='log10')
+p5 <- mpdata %>% ggplot(aes(x = e.coli.cfu, y = particles_l)) + 
+  geom_point() + 
+  theme(axis.text.x = element_text(angle = 90, hjust=1)) + 
+  scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10') + 
+  labs(title = "Microplastic Concentration vs. E. coli CFU", x = "Log(CFU)", y = "Log(Particles/Liter)")
 
-plot(p4)
+plot(p5)
 
 #save figure
-figure_file = here("results","logmpvbacteria.png")
-ggsave(filename = figure_file, plot=p4)
+figure_file = here("results","logmpvcfu.png")
+ggsave(filename = figure_file, plot=p5)
 ```
 
-Note: missing values are for e.coli.cfu for July 2021 sampling. These values should be available for comparison soon. 
 
-Let's look at overall distribution of MP levels
+Let's look at overall distribution of MP levels.
+
+# Distribution of MP concentration
 ```{r}
-mpdata %>% ggplot(aes(x = particles_l)) + geom_histogram()
+mpdata %>% ggplot(aes(x = particles_l)) + geom_histogram() + 
+  labs(title = "Distribution of Microplastic Concentration", x = "Particles/Liter", y = "Observations")
 ```
 
 
 We have some large outliers that make it harder to view the exact distribution of the lower values. Let's filter out the outliers for a moment. 
 
+# Distribution of MP concentration without outliers
 ```{r}
-p5 <- mpdata %>% filter(particles_l < 400) %>% ggplot(aes(x = particles_l)) + geom_histogram()
+p6 <- mpdata %>% filter(particles_l < 400) %>% ggplot(aes(x = particles_l)) + geom_histogram() + 
+  labs(title = "Distribution of Microplastic Concentration", x = "Particles/Liter", y = "Observations")
 
-plot(p5)
+plot(p6)
 
 #save figure
 figure_file = here("results","distribution.png")
-ggsave(filename = figure_file, plot=p5)
+ggsave(filename = figure_file, plot=p6)
 ```
 
 We see that most levels fall below 100 particles per liter. 
-
+# Summary statistics
 ```{r}
 summary(mpdata$particles_l)
-
 ```
 
 These summary statistics give us a little more descriptive information about the dataset. The other variables that I wanted to look at particles per liter alongside were land cover. The process for looking at land cover will be a little more complicated - there a key for variable names corresponding to land types that I need to look closer at, and I am also not sure if the scale of the land cover data will be appropriate. Currently, it is at the census FIPS code level (approximately county level). Since most of these samples occur within that same area, we don't have other reference areas for comparison. I'll have to think about what I can do with this information. 
 
-I also wanted to look at proximity of sample sites to water reclamation facilities (WRFs). Let's try that. 
-# load WRF location
+# correlation matrices
 ```{r}
-#path to data
-wrfdata_location <- here::here("data","processed_data","wrflocation.rds")
+library(GGally) #for produces correlation matrices
 
-#load data
-wrflocation <- readRDS(wrfdata_location)
-```
+#subsetting data to keep only variables we are interested in for the corr plot
+mpdatacorr <- mpdata %>% select(-"quarter", 
+                                -"month", 
+                                -"lat",
+                                -"long", 
+                                -"year")
 
-Eventually, I would like to be able to view this information on a map - where WRFs are labelled, and samples sites are color-coded by density of microplastics found. For now, let's see if we can calculate distance otherwise. 
+#correlation using MP, UOWN, population data
+p7 <- ggcorr(mpdatacorr, 
+       label_alpha = TRUE) + labs(title = "Microplastic Predictor Correlation Matrix")
 
-```{r}
-library(geodist)
-
-#calculate distance between sample coordinates and WRF location
-wrfdistance <- geodist_vec(mpdata$long, mpdata$lat, wrflocation$long, wrflocation$lat)
-```
-
-I think the product we have here is a matrix of the distance of each sample site from each of the three WRFs, in the order that they appear in the WRF data (Cedar Creek, North Oconee, Middle Oconee). But, the labelling of the data is not super clear, so I need to verify this to be sure. 
-
-
-```{r}
-test <- mpdata %>% mutate(wrfdist = geodist_vec(mpdata$long, mpdata$lat, wrflocation$long, wrflocation$lat))
-```
-
-This produced another column like I wanted, but I don't know which WRF the distance was calculated for. Maybe I need to save WRF locations as individual lat and long values, and produce three new columns that way? However, I am not sure what the final product would look like if we do that, because a sample site could be closely associated with one WRF but much further from another one. Maybe I need to narrow this down to proximity to the nearest WRF, so that each sample site is only associated with the distance to ONE WRF, not three. 
-
-#Working on gathering WRF distance
-```{r}
-#set individual WRF locations and save as values
-cedarcreeklat = 33.87351 
-cedarcreeklong = -83.33639
-northoconeelat = 33.93402
-northoconeelong = -83.36018
-middleoconeelat = 33.90862
-middleoconeelong = -83.39214
-
-mpdata <- mpdata %>% mutate(ccwrf = geodist_vec(mpdata$long, mpdata$lat, cedarcreeklong, cedarcreeklat))
-mpdata <- mpdata %>% mutate(nowrf = geodist_vec(mpdata$long, mpdata$lat, northoconeelong, northoconeelat))
-mpdata <- mpdata %>% mutate(miwrf = geodist_vec(mpdata$long, mpdata$lat, middleoconeelong, middleoconeelat))
-
-#Since I only care about the proximity to the closest WRF, my next task is to write code that creates a new variable returning only the lowest value out of ccwrf, nowrf, and miwrf for each sample site. 
-
-#subset data into just distance from each WRF
-wrf <- mpdata %>% select("ccwrf", "nowrf", "miwrf", "site", "date") 
-#find minimum distance to any WRF out of all three
-val <- do.call(pmin, c(wrf, na.rm = TRUE)) 
-minwrf <- transform(wrf, min=val, minCol = names(wrf)[max.col(wrf == val, 'first')])
-
-#minwrf contains the variable min, which tells us the distance from the sample site to the nearest WRF. This is all of the information that we need, so now we will re-join to the original DF
-mpwrfdata <- left_join(mpdata, minwrf)
-
-#remove variables we won't need anymore
-mpwrfdata <- mpwrfdata %>% select(-"ccwrf", 
-                                  -"nowrf",
-                                  -"miwrf")
-#rename columns
-mpwrfdata <- mpwrfdata %>% rename("dist" = "min", 
-                     "wrf" = "minCol")
-
-#save as RDS
-saveRDS(mpwrfdata, file = here("data", "processed_data", "mpwrfdata.rds"))
+plot(p7)
+#save figure
+figure_file = here("results","matrix.png")
+ggsave(filename = figure_file, plot=p7)
 ```
 
 
-Update 10/25/21
-I've updated the population data by accessing census tract level population rather than zip code level population. This should give us more localized population levels and might paint a better picture of the relationship between MP particles per liter and local population level. 
-
-#Adding WRF data to updated population data
+# exploring land use with a correlation matrix
 ```{r}
-#load data
-tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
+athensland <- readRDS(here("data", "processed_data", "athensland.rds"))
 
-#add wrf data to tractpopdata
-wrfjoin <- mpwrfdata %>% select("site", "date", "wrf", "dist") #selecting just the variables we want to add
-mpwrfcombo <- left_join(tractpopdata, wrfjoin, by = c("site", "date")) #joining the two datasets
+#subset data to view in plot
+athenslandcorr <- athensland %>% select(-"long", 
+                                        -"lat") 
 
-#save as RDS
-saveRDS(mpwrfcombo, file = here("data", "processed_data", "mpwrfcombo.rds"))
-```
+#land use correlation matrix
+p8 <- ggcorr(athenslandcorr, 
+       label_alpha = TRUE) + labs(title = "Land Use Correlation Matrix")
 
-Now, `mpwrfcombo` contains the sample info and the new WRF distance info. However, something to work on going forward is that a sample site may be near a WRf but not downstream of it. It might be more important to know the distance to the nearest upstream WRF. I'll have to go back and consider this as I continue my exploration/analysis. 
-
-Other than not including landcover data, `mpwrfcombo` is the most comprehensive dataset, including almost all of the data that I have compiled so far.  
-
-# Plotting population vs particles per liter w/ new data
-```{r}
-tractpopdata %>% ggplot(aes(x = population, y = particles_l)) + geom_point() 
-```
-
-With this plot, we still don't see an obvious relationship between particles per liter and population level, even with our updated population levels. 
-
-
-```{r}
-tractpopdata %>% ggplot(aes(x = population, y = particles_l)) + geom_point() + scale_x_continuous(trans='log10') +
-  scale_y_continuous(trans='log10')
+plot(p8)
+#save figure
+figure_file = here("results","landmatrix.png")
+ggsave(filename = figure_file, plot=p8)
 ```
 

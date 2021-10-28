@@ -1,6 +1,6 @@
 ---
-title: "Microplastics in the Urban Environment"
-subtitle: "Exploratory Study of Freshwater Microplastics in Athens, GA"
+title: "Plastic in the Urban Freshwater Environment"
+subtitle: "An Exploratory Study of Microplastics in the Upper Oconee Watershed via Community-Based Efforts"
 author: Amelia M. Foley
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
@@ -9,17 +9,20 @@ output:
   bookdown::word_document2: 
     toc: false
     number_sections: true
+    #reference_docx: style_template.docx #working on creating a template doc with the appropriate style for the conference I am attending next summer (ASTM) so that my manuscript can be automatically formatted
   bookdown::html_document2: 
     toc: false
-bibliography: library.bib #I am having trouble with the bib file (error message: pandoc error 83 file not found). Removing this line for now so that Manuscript will knit. Will continue to troubleshoot and fix bib formatting. Bib file works now, but some citations recieve double brackets. Will continue looking into this issue
+bibliography: library.bib 
 csl: elsevier.csl
 ---
 
-This document will be my final manuscript for the MADA project. I am keeping these draft sections for structure now, until I edit them later. 
 
-
-# Summary/Abstract
-_Write a summary of your project._
+# Abstract
+With growing awareness of plastic pollution and its detrimental environmental impacts, there has been increased attention on the study of microplastics. These small debris result from the weathering and breakdown of plastic waste from urban runoff, agricultural runoff, ocean dumping, stormwater, waste management, and other sources. Microplastics pose a threat to both aquatic life and human health due to their chemical makeup, their build-up in the environment, and their suspected long-term biological effects. As their ubiquity becomes more apparent, so does the need for accessible, affordable, and effective methods for the widespread study and quantification of microplastic pollution.
+ 
+This study takes place in Athens, GA, an urban area which houses a population of about 127,000. The project relies on local volunteer citizen science efforts for water sampling, processing, and analysis. Given the local and regional ecological significance of the Oconee River—including its transport of freshwater to the Atlantic Ocean—this study aims to collect relevant data regarding microplastics in the Upper Oconee Watershed, which includes 2 rivers and 15 creeks in Athens-Clarke County.
+ 
+Through community-based sample collection and analysis, volunteers quantified microplastics through membrane filtration and visual identification. Preliminary data consistently show that local freshwater microplastic levels are greater than the U.S. average in the Upper Oconee Watershed, a portion of the Oconee River basin with both a high population size and high population density relative to other regions of Georgia. Average and median concentrations of 95 particles/L and 46 particles/L, respectively, were recorded throughout one year of seasonal sampling. Further visual and statistical analysis will confirm the project’s results, and discussion of these results in context will reveal the efficacy of this community-based approach to the quantification of microplastics. 
 
 
 # Introduction 
@@ -54,9 +57,7 @@ These questions also relate to hypothesized predictors of microplastic pollution
 
 My ideas for how to analyze this data include using non-parametric statistical tests, correlation matrices, and modeling (?) to characterize and compare observations. 
 
-# Methods and Results
-
-_In most research papers, results and methods are separate. You can combine them here if you find it easier. You are also welcome to structure things such that those are separate sections._
+# Methods
 
 
 ## Data aquisition
@@ -114,6 +115,8 @@ Example table \@ref(tab:resulttable) shows a table summarizing a linear model fi
 #knitr::kable(resulttable, caption = 'Linear model fit table.')
 ```
 
+
+# Results
 
 # Discussion
 

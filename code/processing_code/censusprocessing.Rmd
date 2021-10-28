@@ -81,7 +81,7 @@ latlong2fips_vec <- Vectorize(latlong2fips, vectorize.args = "latitude", "longit
 
 fips <- popdata %>% rowwise() %>% mutate(FIPS = latlong2fips_vec(lat, long))
 
-saveRDS(fips, "fips.RDS")
+saveRDS(fips, here("data", "processed_data", "fips.RDS"))
 ```
 
 

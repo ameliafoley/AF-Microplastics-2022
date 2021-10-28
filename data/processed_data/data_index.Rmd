@@ -1,0 +1,30 @@
+---
+title: "readme"
+output: html_document
+---
+
+# Index of Processed Data, Alphabetical
+1. *athensland.rds*
+  - contains all sample data combined with tract population level, tract land use, UOWN data
+2. *cleansamplesdata.rds*
+  - contains JUST original microplastics data, no additional information (109 observations, 6 variables)
+3. *cleanuowndata.rds*
+  - contains UOWN data corresponding to MP sampling, but not yet combined with MP data
+4. *combodata.rds*
+  - combination of MP and UOWN data (contains particles_l and e.coli, visual score, turbidity)
+5. *controldata.rds*
+ - subset from original MP sample data - contains only control observations, no sample observations (technical controls from laboratory methods)
+6. *fips.rds*
+ - contains MP, UOWN, zipcode population, adds FIPS codes to sample observations (does not include population level)
+7. *mpwrfcombo.rds*
+ - contains MP, UOWN, population, and WRF distance variables
+8. *mpwrfdata.rds*
+ - intermediate dataset containing MP, UOWN, population, and WRF distances variables prior to updated population info. we may be able to remove this later
+9. *popdata.rds*
+ - contains MP and UOWN data, and uses zipcode to get population levels. After creating this dataset, I realized census tract population count would be more appropriate. We may be able to remove this later as it is not used in later exploration/analysis
+10. *tractpopdata.rds*
+ - contains MP, UOWN, FIPS, and tract population level data
+10. *volunteer.rds*
+ - subset of MP data containing just July_21 observations and volunteer ID numbers. May be used to compare volunteer MP counting accuracy
+11. *wrflocation.rds*
+ - contains coordinates of Athens' 3 WRF. Initially attempted to import data and use to calculate distance to nearest WRF, but later ended up manually assigning values in the Rmd. We may be able to remove this later
