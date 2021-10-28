@@ -25,6 +25,7 @@ library(here) #to set paths
 library(tidyverse)
 library(ggplot2)
 library(geodist) #to calculate distance from sample site to each water reclamation facility
+library(GGally) #for producing correlation matrices
 
 #path to data
 data_location <- here::here("data","processed_data","mpwrfcombo.rds")
@@ -153,8 +154,6 @@ These summary statistics give us a little more descriptive information about the
 
 # correlation matrices
 ```{r}
-library(GGally) #for produces correlation matrices
-
 #subsetting data to keep only variables we are interested in for the corr plot
 mpdatacorr <- mpdata %>% select(-"quarter", 
                                 -"month", 
@@ -191,3 +190,65 @@ figure_file = here("results","landmatrix.png")
 ggsave(filename = figure_file, plot=p8)
 ```
 
+# concentration at each site throughout seasons
+```{r}
+p9 <- mpdata %>% ggplot(aes(x = site, y = particles_l, color = date)) + 
+  geom_point() + scale_color_discrete(name = "Date", 
+                                     breaks= c("nov_20", "feb_21", "apr_21", "july_21"), 
+                                     labels = c("Fall 2020", "Winter 2021", "Spring 2021", "Summer 2021")) +
+  theme(axis.text.x = element_text(angle = 90, hjust=1)) +
+  labs(title = "Seasonal Microplastic Concentration by Site", x = "Site", y = "Particles/Liter") + ylim(0,500) #removing outliers to better visualize majority of concentrations
+
+plot(p9)
+#save figure
+figure_file = here("results","seasonalconc_bysite.png")
+ggsave(filename = figure_file, plot=p9)
+```
+
+# View concentration by watershed
+```{r}
+p10 <- mpdata %>% ggplot(aes(x = watershed, y = particles_l, color = )) + 
+  geom_boxplot()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Watershed", x = "Watershed", y = "Particles/Liter") + ylim(0,500)
+
+plot(p10)
+#save figure
+figure_file = here("results","conc_bywatershed.png")
+ggsave(filename = figure_file, plot=p10)
+```
+# Boxplot for individual sites throughout season
+```{r}
+p11 <- mpdata %>% ggplot(aes(x = site, y = particles_l, color = )) + 
+  geom_boxplot()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Site", x = "Site", y = "Particles/Liter") + ylim(0,500)
+
+plot(p11)
+#save figure
+figure_file = here("results","conc_bysite.png")
+ggsave(filename = figure_file, plot=p11)
+```
+# concentration over time by watershed
+```{r}
+# calculate mean concentration in each watershed for each sample date
+mean_data <- group_by(mpdata, watershed, date) %>%
+             summarise(particles_l = mean(particles_l, na.rm = TRUE))
+
+# create plot using mean data
+p12 <- mean_data %>% ggplot(aes(x = date, y = particles_l, color = watershed, group = watershed)) + 
+  geom_point() + geom_path() + scale_color_discrete(name = "Watershed")+ 
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Watershed Microplastic Concentration Over Time", x = "Watershed", y = "Particles/Liter") + scale_x_discrete(labels=c("Fall 2020",
+                            "Winter 2021",
+                            "Spring 2021",
+                            "Summer 2021"))+ 
+  ylim(0,300) #removing outliers to better visualize majority of concentrations
+
+plot(p12)
+#save figure
+figure_file = here("results","watershed_overtime.png")
+ggsave(filename = figure_file, plot=p12)
+```
+
+Nice! Going forward, I should think about whether to keep or remove the watersheds that were only sampled in the last (July) sampling. I also see that some watershed are missing intermediate data points and are not connected. Would we want to connect and skip over a season, or leave them unconnected (looking at Oconee River)
