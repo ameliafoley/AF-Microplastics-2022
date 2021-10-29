@@ -11,13 +11,25 @@ I pulled additional data from a couple of different sources to supplement my pri
 
 My main text output for the Project Part 2 submission is the `exploration.Rmd` file located under `code/analysis_code`. For this part of the project, I spent a large portion of time attaining/cleaning/wrangling additional data to supplement my own original data. For this reason, my exploration is not as far along as I plan for it to be quite yet. I have explored distribution of microplastic levels, and relationships between MP levels and population and bacteria level. I need to further explore proximity to water reclamation facility effluent and land cover as the project continues.
 
+# Project Part 3: Beginning Analysis
+At this project checkpoint, I have continued to work on data exploration and have begun the analysis/modeling portion of the project. There are some additions to my manuscript, including exploratory figures and initial models. I'm working on configuring the style to match the requirements for a conference where my abstract was accepted (reference issue now resolved as well). I have also changed my methods for acquiring population data (from zip code to census tract), and I have figured out how to calculate another variable, distance from nearest water reclamation facility. The UOWN data from July 2021 is also now available and has been added to my project. 
+
+Some thoughts going forward:
+ - Considering compiling processing files to decrease how many Rmd are needed to reproduce.
+ - Having issues with figuring numbering in the `Manuscript.Rmd` word doc output; also trying to customize style output to fit certain publishing requirements
+ - Not seeing super obvious relationships between outcome/predictors - unsure about the quality of modeling I'll be able to produce (?)
+ - Still need to write up a section on data processing/wrangling to include in the manuscript (with main code in the supplementary file)
+
+
 # Reproducing this project
 All required data files are located within this R.project file on GitHub. Run scripts in this order:
 1. mpprocessing.R
-2. censusland_code.Rmd
-3. uownprocessing.Rmd
-4. censusprocessing.Rmd
-5. exploration.Rmd
-6. Manuscript.Rmd
+2. uownprocessing.Rmd
+3. censusprocessing.Rmd
+4. censusland_code.Rmd
+5. wrfprocessing.Rmd
+6. exploration.Rmd
+7. analysis.Rmd
+
 
 

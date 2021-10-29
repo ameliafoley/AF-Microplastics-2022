@@ -36,12 +36,6 @@ Through decades of research, the scientific community proves that microplastics 
 
 The data that I am using for this project is from my personal undergraduate research project on freshwater microplastics in Athens, GA. The study is ongoing and was conducted in collaboration with the Upper Oconee Watershed Network (UOWN) via their quarterly sampling events. There is one year’s worth of quarterly data, with the following sample dates: November 2020, February 2021, April 2021, and July 2021. The data include variables such as sample site, latitude and longitude, watershed location, and duplicate A and B counts of microplastics observed per filter. For the most recent sampling date, July 2021, there is additional data where a second counting session was performed, in order to assess the comparability of parallel counts. There are about 136 observations of ~10 variables in total in the dataset. The independent variables – site location, coordinates, watershed location, etc – were retrieved from UOWN. Values for microplastic counts were recorded based on visual identification via a dissecting microscope, performed by myself and by a small team of <10 volunteers.
 
-Additional data [write up further explanation]:
- - small area population via census zipcode
- - UOWN bacteria level data
- - local land cover
- - distance from water reclamation facility (WRF)
-
 ## Questions/Hypotheses to be addressed
 The questions that I want to answer with this data include the following:
  - Can we characterize microplastics in Athens, GA using a citizen science approach? 
@@ -55,64 +49,131 @@ Questions that I want to answer that will require gathering more data using coor
  -	Are microplastic levels correlated to bacteria levels measured at the same sites? 
 These questions also relate to hypothesized predictors of microplastic pollution: population level, land use, wastewater treatment plant effluent, and microbial water quality. 
 
-My ideas for how to analyze this data include using non-parametric statistical tests, correlation matrices, and modeling (?) to characterize and compare observations. 
-
 # Methods
-
 
 ## Data aquisition
 _As applicable, explain where and how you got the data. If you directly import the data from an online source, you can combine this section with the next._
 
-- Methods for sample collection and processing for UOWN MP water samples
+### Description of study area
+The Upper Oconee Watershed is located in Northeast Georgia, spanning from Gainesville on the northern end to Lake Sinclair in Milledgeville, Georgia, on the southern end. The Upper Oconee Watershed encompasses 7590 km2, and includes more than 4000 km of streams [@Fisher]. Land within the Upper Oconee Watershed is historically agricultural, but has been subject to increasing urbanization in the past two decades; the study area contains developed and densely populated urban residential areas [@Cho; @Fisher]. The Oconee Watershed is one of 14 river basins in the state of Georgia; the Oconee River feeds into the Altamaha River, which eventually deposits into the Atlantic Ocean off the Georgia coast (source: UOWN website). The Oconee River begins where the North and Middle Oconee Rivers meet, south of Athens, Georgia. The North and Middle Oconee Rivers begin in Lula, GA, and Brassleton, GA, respectively. 
+
+The Upper Oconee Watershed is regularly monitored by the Upper Oconee Watershed Network (UOWN), an Athens-based monitoring, education, advocacy, and recreation organization. Quarterly sampling events occur throughout the year, and the present research project was made possible via collaboration and eventual partnership with UOWN and the quarterly sampling events. The UOWN study area consists of 600 km2.
+
+### Experimental design: sample collection and processing
+1-liter grab samples of water were collected quarterly from Fall 2020 through Summer 2021, in November, February, April, and July by UOWN community members. Samples were collected from 25 to 30 sites on each sampling date. The number of sites was decreased from previous sampling events due to COVID-19 public health restrictions with volunteers. 
+
+Samples were processed via vacuum filtration, which was performed in 150 mL volumes in duplicate for each site. Samples were pumped through gridded 0.45 micron membranes (Whatman) and immediately covered and stored covered in plastic petri dishes at room temperature for up to 8 weeks. 
+Filters were visually inspected using a dissecting microscope with magnification ranging from [INSERT]. Microplastic particles were identified based on the following characteristic features: unnatural homogenous color, unnatural shape, homogenous texture, homogenous width (no tapered end) (CITE). Microplastic concentration (No/L) was calculated by dividing the total microplastic particle count by the sample volume. Duplicates (samples A and B for each site) were averaged to obtain a singular concentration value for each sample site. 
+
+### Controls
+To evaluate contamination in the lab, blank filters were used to gauge airborne contamination and contamination within processing methods. Blank filters were placed in uncovered petri dishes on each work bench during sample filtration and processing. DI and MilliQ water were filtered in 150 mL volumes, in duplicate, to produce controls to represent potential contamination from filtration processes. The average contamination per sample was = INSERT. 
 
 ## Data import and cleaning
-_Write code that reads in the file and cleans it so it's ready for analysis. Since this will be fairly long code for most datasets, it might be a good idea to have it in one or several R scripts. If that is the case, explain here briefly what kind of cleaning/processing you do, and provide more details and well documented code somewhere (e.g. as supplement in a paper). All materials, including files that contain code, should be commented well so everyone can follow along._
 
 Since I am performing importing and cleaning in a separate document, in this section I will provide an overview of my steps/methods for wrangling the data, without actual code in this section. 
 
-Import of additional data
- - census - American Community Survey
- - NGIS land cover
- - zip code - Bing reverse geocoding
- - WRF locations: located on Google Maps, coordinates recorded in Excel spreadsheet
- - UOWN bacteria data (citation/attribution available on UOWN.org)
+To supplement my analysis, additional data was imported as detailed below. 
+
+### UOWN Quarterly Data
+Public data from Upper Oconee Watershed Network, Athens, Georgia; retrieved from www.uown.org
+### Population
+NHGIS [@Mansen]
+### Land Cover
+NHGIS [@Mansen]
+### Water Reclamation Facilities
+Coordinates for Athens-Clarke county's three water reclamation facilities: North Oconee, Middle Oconee, and Cedar Creek were manually located via Google Maps.
 
 ## Exploratory analysis
 
 This section will contain the key products of my exploratory analysis (located in exploration.Rmd) when complete. Since I am keeping this document in manuscript style, I will keep processing/exploration/analysis code separate. 
-_Use a combination of text/tables/figures to explore and describe your data. You should produce plots or tables or other summary quantities for the most interesting/important quantities in your data. Depending on the total number of variables in your dataset, explore all or some of the others. FIgures produced here might be histograms or density plots, correlation plots, etc. Tables might summarize your data._
-
-_Continue by creating plots or tables of the outcome(s) of interest and the predictor/exposure/input variables you are most interested in. If your dataset is small, you can do that for all variables. Plots produced here can be scatterplots, boxplots, violinplots, etc. Tables can be simple 2x2 tables or larger ones._
-
-_To get some further insight into your data, if reasonable you could compute simple statistics (e.g. t-tests, simple regression model with 1 predictor, etc.) to look for associations between your outcome(s) and each individual predictor variable. Though note that unless you pre-specified the outcome and main exposure, any "p<0.05 means statistical significance" interpretation is not valid._
 
 Table \@ref(tab:summarytable) shows a table summarizing the data.
-
-
 ```{r summarytable,  echo=FALSE}
-#saving template for formatting later on
 
-#resulttable=readRDS("../../results/summarytable.rds")
-#knitr::kable(resulttable, caption = 'Data summary table.')
+#summarytable=readRDS("../../results/summarytable.rds")
+#knitr::kable(summarytable, caption = 'Data summary table.')
+
+#I eventually want a nice looking summary statistic table. This is a place holder for now  
 ```
 
+### Distribution of Microplastic Concentration
 
-Figure \@ref(fig:resultfigure) shows a scatterplot figure produced by one of the R scripts.
+Figure \@ref(fig:distribution) shows a histogram of microplastic concentration observations. The minimum concentration is 16.67 particles/L and the maximum is 1193.33 particles/L. The mean concentration is 104.39 particles/L, and the median is 66.67 particles/L. 
 
-```{r resultfigure,  fig.cap='Analysis figure.', echo=FALSE}
-#knitr::include_graphics("../../results/resultfigure.png")
+```{r distribution,  fig.cap='Distribution of Microplastic Concentration', echo=FALSE}
+knitr::include_graphics("../../results/distribution.png")
 ```
 
+Microplastic concentrations remained in similar ranges throughout the study period. Figure \@ref(fig:concentrationbydate) shows a boxplot of concentrations by sample date. 
+
+```{r concentrationbydate,  fig.cap='Particles/L by Sample Date', echo=FALSE}
+knitr::include_graphics("../../results/concentrationbydate.png")
+```
+
+There is some seasonal variation in concentration at each individual site. Figure \@ref(fig:seasonalconc-bysite) shows a plot of concentrations at each site. 
+
+```{r seasonalconc-bysite,  fig.cap='Seasonal Variation in Particles/L', echo=FALSE}
+knitr::include_graphics("../../results/seasonalconc_bysite.png")
+```
+
+There are similar microplastic levels throughout the watersheds within the Upper Oconee. Some watersheds experienced greater variation in microplastic levels than other watersheds. Figure \@ref(fig:conc-bywatershed) shows the microplastic concentrations by watershed. 
+
+```{r conc-bywatershed,  fig.cap='Watershed Microplastic Concentrations', echo=FALSE}
+knitr::include_graphics("../../results/conc_bywatershed.png")
+```
+
+Figure \@ref(fig:watershed-overtime) shows a line graph of the mean watershed microplastic concentrations at each seasonal sampling date. 
+
+```{r watershed-overtime,  fig.cap='Microplastic Concentration Over Time', echo=FALSE}
+knitr::include_graphics("../../results/watershed_overtime.png")
+```
+
+### Predictors
+Population, land cover/use, and bacteria levels are hypothesized predictors of microplastic concentration. Figure \@ref(fig:particlesvpop) and Figure \@ref(fig:logmpvcfu) demonstrate the relationship between microplastic concentration and population and microplastic concentration and bacteria levels (CFU/L), respectively. 
+
+```{r particlesvpop,  fig.cap="Particles/L vs Population", echo=FALSE}
+knitr::include_graphics("../../results/particlesvpop.png")
+```
+
+```{r logmpvcfu,  fig.cap='Log particles/L vs CFU', echo=FALSE}
+knitr::include_graphics("../../results/logmpvcfu.png")
+```
+
+Figure \@ref(fig:matrix) and Figure \@ref(fig:landmatrix) show correlation matrices for the hypothesized predictor and for the different categories of land use. 
+
+```{r matrix,  fig.cap='Predictor matrix', echo=FALSE}
+knitr::include_graphics("../../results/matrix.png")
+```
+
+```{r landmatrix,  fig.cap='Land cover matrix', echo=FALSE}
+knitr::include_graphics("../../results/landmatrix.png")
+```
 
 ## Full analysis
 
-_Use one or several suitable statistical/machine learning methods to analyze your data and to produce meaningful figures, tables, etc. This might again be code that is best placed in one or several separate R scripts that need to be well documented. You want the code to produce figures and data ready for display as tables, and save those. Then you load them here._
+Preliminary modeling reveals that there is not a strong relationship between microplastic concentration and population level. Figure \@ref(fig:m-concvpop-no-outlier) demonstrates a linear model fit. 
 
-Example table \@ref(tab:resulttable) shows a table summarizing a linear model fit.
+```{r m-concvpop-no-outlier,  fig.cap='Concentration vs Population Linear Model', echo=FALSE}
+knitr::include_graphics("../../results/m_concvpop_no_outlier.png")
+```
 
-```{r resulttable,  echo=FALSE}
-#resulttable=readRDS("../../results/resulttable.rds")
-#knitr::kable(resulttable, caption = 'Linear model fit table.')
+Figure \@ref(fig:m-logconcvcfu) shows a linear model of microplastic concentration vs CFU (both variables log-transformed). 
+
+```{r m-logconcvcfu,  fig.cap='Concentration vs CFU Linear Model', echo=FALSE}
+knitr::include_graphics("../../results/m_logconcvcfu.png")
+```
+
+Figure \@ref(fig:concvturbidity) demonstrates a linear model of particles/L vs turbidity.
+
+```{r m_concvturbidity,  fig.cap='Concentration vs Turbidity Linear Model', echo=FALSE}
+knitr::include_graphics("../../results/m_concvturbidity.png")
+```
+
+Table \@ref(tab:lmfittable) shows a table summarizing a linear model fit predicting particles/L with 6 predictors. 
+
+```{r lmfittable,  echo=FALSE}
+lm_fit_table=readRDS("../../results/lm_fit_table.rds")
+knitr::kable(lm_fit_table, caption = 'Linear model fit table.')
 ```
 
 

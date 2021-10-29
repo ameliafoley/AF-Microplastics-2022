@@ -90,7 +90,6 @@ Here, after attemping to use `get_decennial()` we receive an error message sugge
 # Using NHGIS data for more recent block-level population counts
 ```{r}
 #Downloaded data from http://NHGIS.org
-install.packages("ipumsr")
 library(ipumsr)
 
 #read in census tract level population data

@@ -24,8 +24,8 @@ library(dplyr) #for data processing
 library(here) #to set paths
 library(tidyverse)
 library(ggplot2)
-library(geodist) #to calculate distance from sample site to each water reclamation facility
 library(GGally) #for producing correlation matrices
+
 
 #path to data
 data_location <- here::here("data","processed_data","mpwrfcombo.rds")
@@ -34,6 +34,15 @@ data_location <- here::here("data","processed_data","mpwrfcombo.rds")
 mpdata <- readRDS(data_location)
 
 ```
+
+# Summary statistics
+```{r}
+summary <- summary(mpdata)
+summary
+#save table
+saveRDS(summary, file = here("results", "summarytable.rds"))
+```
+
 
 # MP concentration by season
 ```{r}

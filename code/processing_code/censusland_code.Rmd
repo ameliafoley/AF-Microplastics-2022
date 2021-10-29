@@ -6,6 +6,9 @@ output: html_document
 ##Load Dependencies
 The following code loads the package dependencies for our analysis:
 ```{r}
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
 #install.packages("tidycensus", repos = "http://cran.us.r-project.org")
 #install.packages("censusapi", repos = "http://cran.us.r-project.org")
 #install.packages("censusGeography", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/chron_2.3-55.tgz")

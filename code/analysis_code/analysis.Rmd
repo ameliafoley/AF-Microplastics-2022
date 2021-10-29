@@ -13,6 +13,7 @@ library(ggplot2) #for plotting
 library(broom) #for cleaning up output from lm()
 library(here) #for data loading/saving
 library(tidymodels) #for modeling
+library(gridExtra) #for exporting tables
 
 data <- readRDS(here("data", "processed_data", "mpwrfcombo.rds"))
 ```
@@ -21,19 +22,71 @@ data <- readRDS(here("data", "processed_data", "mpwrfcombo.rds"))
 ```{r}
 #attempt to visualize data
 #look at particles per L vs population
-ggplot(data, aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm)
+m1 <- ggplot(data, aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Particles/Liter")
+
+plot(m1)
+#save figure
+ggsave(filename = here("results","m_concvpop.png"), plot=m1)
 ```
 
+# particles per liter vs population with outliers filtered out
+```{r}
+#attempt to visualize data
+#look at particles per L vs population
+m2 <- data %>% filter(particles_l < 750) %>% ggplot(aes(x = population, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Particles/Liter")
+
+plot(m2)
+#save figure
+ggsave(filename = here("results","m_concvpop_no_outlier.png"), plot=m2)
+```
+
+
+# fit linear model to continuous outcome (particles_l) with log transformation
+```{r}
+#attempt to visualize data
+#look at particles per L vs population
+m3 <- ggplot(data, aes(x = population, y = particles_l)) + geom_point() +
+  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Log(Particles/Liter)")
+
+plot(m3)
+#save figure
+ggsave(filename = here("results","m_logconcvpop.png"), plot=m3)
+```
+
+# visualize particles vs e.coli.cfu 
+```{r}
+m4 <- ggplot(data, aes(x = e.coli.cfu, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. E. coli CFU", x = "CFU/mL", y = "Particles/Liter")
+
+plot(m4)
+#save figure
+ggsave(filename = here("results","m_concvcfu.png"), plot=m4)
+```
+
+# particles per liter vs e.coli.cfu with log transformation
+```{r}
+m5 <- ggplot(data, aes(x = e.coli.cfu, y = particles_l)) + geom_point() + scale_x_continuous(trans='log10') +
+  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. E. coli CFU", x = "Log(CFU/mL)", y = "Log(Particles/Liter)")
+
+plot(m5)
+#save figure
+ggsave(filename = here("results","m_logconcvcfu.png"), plot=m5)
+```
 
 
 # linear regression
 ```{r}
+data <- data %>% select("particles_l", "visual_score", "turbidity.ntu", "temperature.c", "e.coli.cfu", "population", "dist")
+
 #linear regression model specification set up
 lm_mod <- linear_reg() %>% set_engine("lm")
 #estimating/training linear model
 lm_fit1 <- lm_mod %>% fit(particles_l ~ ., data = data)
+#save table
+lm_fit1_table <- tidy(lm_fit1)
 #view summary of fit
-tidy(lm_fit1)
+(lm_fit1)
+#save file
+saveRDS(lm_fit1_table, file = here("results", "lm_fit_table.rds"))
 ```
 
 # linear regression for one predictor, one outcome
@@ -49,20 +102,21 @@ lm_fit3 <- lm_mod %>% fit(particles_l ~ e.coli.cfu, data = data)
 tidy(lm_fit3)
 
 #comparison of fit
-comp2_3 <- anova(lm_fit2$fit, lm_fit3$fit, test = "Chisq")
-comp2_3
+#comp2_3 <- anova(lm_fit2$fit, lm_fit3$fit, test = "Chisq")
+#comp2_3
+#these lines of code are kept to show how I got the original error message about models not being fitted to the same size dataset, but I have cut them out so that the code will run smoothly
 ```
 
 Here, we get an error message that models were not fitted to the same size of dataset. This is likely due to missing values in some predictors. To solve this, we can clean up the dataset some more and create a dataset specifically to use for modelling, that has only predictors of interest and no missing values. 
 
-#clean up data for modelling
+# create subset of data with only complete cases
 ```{r}
-data %>% is.na() %>% summary()
-complete <- data %>% na.omit()
+data %>% is.na() %>% summary() #check out missing cases
+complete <- data %>% na.omit() #save complete cases
 ```
 
 Trying code from above again with the complete dataset
-
+# Modeling with complete cases only
 ```{r}
 #estimating/training linear model
 lm_fit4 <- lm_mod %>% fit(particles_l ~ ., data = complete)
@@ -83,26 +137,17 @@ comp5_6 <- anova(lm_fit5$fit, lm_fit6$fit, test = "Chisq")
 comp5_6
 ```
 
-Here, we have a VERY large RSS, which I think indicates a poor model fit for our data. Let's try with some variables removed. 
+Here, we have a VERY large RSS, which I think indicates a poor model fit for our data. Let's try with some variables removed. If an RSS of 0 is a perfect model, our RSS of 2 million is either a *very bad* model or I am making some sort of error/misinterpreting(?). 
 
-# Subsetting data to remove unimportant variables
+# Modeling single predictors with complete cases
 ```{r}
-subset <- complete %>% select(-"site", 
-                              "lat", 
-                              "long",
-                              "date") 
-#estimating/training linear model
-lm_fit7 <- lm_mod %>% fit(particles_l ~ ., data = subset)
-#view summary of fit
-tidy(lm_fit7)    
-
 #predict particles per liter based on population
-lm_fit8 <- lm_mod %>% fit(particles_l ~ population, data = subset)
+lm_fit8 <- lm_mod %>% fit(particles_l ~ population, data = complete)
 #view summary of fit
 tidy(lm_fit8)
 
 #predict particles per liter based on e coli
-lm_fit9 <- lm_mod %>% fit(particles_l ~ e.coli.cfu, data = subset)
+lm_fit9 <- lm_mod %>% fit(particles_l ~ e.coli.cfu, data = complete)
 #view summary of fit
 tidy(lm_fit9)
 
@@ -126,7 +171,7 @@ train_data <- training(data_split)
 test_data <- testing(data_split)
 ```
 
-# recipe to fit continuous outcome to all predictors
+# recipe to fit particles/L outcome to all predictors
 ```{r}
 #recipe for particles per liter, all predictors
 mp_rec <- 
@@ -146,7 +191,7 @@ mp_fit %>% extract_fit_parsnip() %>% tidy()
 
 Here, we see site names come up first, even though we know site names are not going to be good predictors of microplastic levels. I need to go back and remove the variables that aren't going to be helpful predictors (ex: site name) 
 
-# evaluate model with ROC and ROC-AUC
+# evaluate model with RMSE
 ```{r}
 #use trained workflow to predict with test data
 predict(mp_fit, test_data)
@@ -162,9 +207,46 @@ mp_aug %>% rmse(truth = particles_l, .pred)
 Why are there so many rows resulting? When we did the analysis last week, only one row was the result, and it was just rmse and provided a value around 1. 
 
 
-
-#trying model evaluation with SUBSET
+#trying model evaluation with turbidity - linear regression
 ```{r}
+#estimating/training linear model
+turb_fit1 <- lm_mod %>% fit(particles_l ~ turbidity.ntu, data = data)
+#view summary of fit
+tidy(turb_fit1)
+
+#visualize linear model
+t1 <- ggplot(data, aes(x = turbidity.ntu, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Turbidity", x = "Turbidity (ntu)", y = "Particles/Liter")
+
+#save figure
+ggsave(filename = here("results","m_concvturbidity.png"), plot=t1)
+```
+
+#evaluating fit using turbidity as predictor
+```{r}
+#recipe for particles per liter, all predictors
+turb_rec <- 
+  recipe(particles_l ~ turbidity.ntu, data = train_data)
+
+#linear regression model workflow set up
+turb_wflow <- 
+  workflow() %>% add_model(lm_mod) %>% add_recipe(turb_rec)
+
+#use workflow to prepare recipe and train model with predictors
+turb_fit <- 
+  turb_wflow %>% fit(data = train_data)
+
+#extract model coefficient
+turb_fit %>% extract_fit_parsnip() %>% tidy()
+
+#use trained workflow to predict with test data
+predict(turb_fit, test_data)
+
+#include probabilities
+turb_aug <- augment(turb_fit, test_data)
+
+#get RMSE for test data
+turb_aug %>% rmse(truth = particles_l, .pred)
 
 ```
 
+Here, I am still confused about why so many rmse values are resulting. Earlier, I was getting multiple rmse values but thought it was because I was building a model with all predictors. Here, I am using one predictor but still getting multiple rmse values. If I remember correctly, there was only one rmse value in the exercises we worked on in the previous weeks. 

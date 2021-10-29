@@ -6,6 +6,11 @@ output: html_document
 I also wanted to look at proximity of sample sites to water reclamation facilities (WRFs). Let's try that. 
 # load WRF location
 ```{r}
+library(here)
+library(geodist) #to calculate distance from sample site to each water reclamation facility
+library(dplyr) #for data processing
+library(tidyverse)
+
 #load MP data
 mpdata <- readRDS(here("data", "processed_data", "popdata.rds"))
 #path to data
