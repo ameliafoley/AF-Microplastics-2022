@@ -68,6 +68,9 @@ Update 10/25/21
 I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let's try to use FIPS codes (which include tract info) to obtain population data that might be more informative. 
 # Converting coordinates to FIPS
 ```{r}
+#load census API key
+tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE, overwrite = TRUE) 
+
 #create function
 latlong2fips <- function(latitude, longitude) {
   url <- "https://geo.fcc.gov/api/census/block/find?format=json&latitude=%f&longitude=%f"

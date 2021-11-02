@@ -647,6 +647,12 @@ popdata_loc &lt;- here::here(&quot;data&quot;, &quot;processed_data&quot;, &quot
 saveRDS(popdata, file = popdata_loc)</code></pre>
 <p>Update 10/25/21</p>
 <p>I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let’s try to use FIPS codes (which include tract info) to obtain population data that might be more informative. # Converting coordinates to FIPS</p>
+<pre class="r"><code>#load census API key
+tidycensus::census_api_key(&quot;c02ef0638e60f9d5fbb45de5219821e3a25cd7d2&quot;, install = TRUE, overwrite = TRUE) </code></pre>
+<pre><code>## Your original .Renviron will be backed up and stored in your R HOME directory if needed.</code></pre>
+<pre><code>## Your API key has been stored in your .Renviron and can be accessed by Sys.getenv(&quot;CENSUS_API_KEY&quot;). 
+## To use now, restart R or run `readRenviron(&quot;~/.Renviron&quot;)`</code></pre>
+<pre><code>## [1] &quot;c02ef0638e60f9d5fbb45de5219821e3a25cd7d2&quot;</code></pre>
 <pre class="r"><code>#create function
 latlong2fips &lt;- function(latitude, longitude) {
   url &lt;- &quot;https://geo.fcc.gov/api/census/block/find?format=json&amp;latitude=%f&amp;longitude=%f&quot;

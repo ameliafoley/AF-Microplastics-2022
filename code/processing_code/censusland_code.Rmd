@@ -25,8 +25,6 @@ library(RCurl)
 
 ##Load Census API (load only once)
 ```{r}
-#specify from which package a function is to be used
-
 #tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE) 
 ```
 ^This is not a code chunk you will need in every notebook. As long as "install = TRUE", you will only have to do this once. 
