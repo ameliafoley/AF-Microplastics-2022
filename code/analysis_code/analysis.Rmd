@@ -197,7 +197,7 @@ Here, we see site names come up first, even though we know site names are not go
 predict(mp_fit, test_data)
 
 #include probabilities
-mp_aug <- augment(mp_fit, test_data)
+mp_aug <- augment(mp_fit, test_data) 
 
 #get RMSE for test data
 mp_aug %>% rmse(truth = particles_l, .pred)

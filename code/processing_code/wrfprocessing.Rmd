@@ -90,6 +90,9 @@ glimpse(mpwrfcombo)
 #convert dist from character to numeric
 mpwrfcombo <- mpwrfcombo %>% mutate(dist = as.numeric(dist))
 
+#ungroup df
+mpwrfcombo <- ungroup(mpwrfcombo)
+
 #save as RDS
 saveRDS(mpwrfcombo, file = here("data", "processed_data", "mpwrfcombo.rds"))
 ```
