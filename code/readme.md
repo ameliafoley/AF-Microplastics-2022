@@ -21,4 +21,4 @@ The mpprocessing.R is the initial code to load, clean, and wrangle the raw data.
  - produces: multiple plots
 7. *analysis.Rmd*
  - requires: mpwrfcombo
- - produces: various modeling fits
+ - produces: various modeling fits, subset_data.rds

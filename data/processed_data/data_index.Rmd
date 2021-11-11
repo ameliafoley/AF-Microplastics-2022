@@ -3,7 +3,7 @@ title: "readme"
 output: html_document
 ---
 
-# Index of Processed Data, Alphabetical
+# Index of Processed Data
 1. *athensland.rds*
   - contains all sample data combined with tract population level, tract land use, UOWN data
 2. *cleansamplesdata.rds*
@@ -28,3 +28,5 @@ output: html_document
  - subset of MP data containing just July_21 observations and volunteer ID numbers. May be used to compare volunteer MP counting accuracy
 11. *wrflocation.rds*
  - contains coordinates of Athens' 3 WRF. Initially attempted to import data and use to calculate distance to nearest WRF, but later ended up manually assigning values in the Rmd. We may be able to remove this later
+12. *data_subset.rds*
+ - contains the following variables subset from athens_land: "particles_l", "visual_score", "turbidity.ntu", "temperature.c", "e.coli.cfu", "population", "dist"

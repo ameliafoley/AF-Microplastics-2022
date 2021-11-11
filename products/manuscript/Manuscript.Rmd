@@ -9,6 +9,8 @@ output:
   bookdown::word_document2: 
     toc: false
     number_sections: true
+    global_numbering: true
+    fig_caption: yes
     #reference_docx: style_template.docx #working on creating a template doc with the appropriate style for the conference I am attending next summer (ASTM) so that my manuscript can be automatically formatted
   bookdown::html_document2: 
     toc: false
