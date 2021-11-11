@@ -393,285 +393,28 @@ library(dplyr) #for data processing</code></pre>
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(revgeo) #for reverse geocoding coordinates to zipcode
 
-#path to data
-data_location &lt;- here::here(&quot;data&quot;,&quot;raw_data&quot;,&quot;zippop.xlsx&quot;)
-
-#load population data. 
-zippop &lt;- read_excel(data_location)
-
-#load MP data
-data_location1 &lt;- here::here(&quot;data&quot;,&quot;processed_data&quot;,&quot;combodata.rds&quot;)
 
 #load data. 
-combodata &lt;- readRDS(data_location1)</code></pre>
-<div id="convert-lat-long-to-zip" class="section level1">
-<h1>convert lat long to zip</h1>
-<pre class="r"><code># use Bing API to convert coordinates to corresponding zip code
-zip&lt;-revgeo(longitude=combodata$long, 
-                            latitude=combodata$lat, 
-                            provider = &#39;bing&#39;, API = &#39;AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&#39;, output=&quot;frame&quot;, item = &quot;zip&quot;)</code></pre>
-<pre><code>## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.902543,-83.523012?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8944,-83.5028?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.918074,-83.413804?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9339,-83.5459?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.865864,-83.403549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.930475,-83.361442?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.902543,-83.523012?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.890719,-83.506839?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8944,-83.5028?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.918074,-83.413804?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9339,-83.5459?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.865864,-83.403549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.930475,-83.361442?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.949823,-83.376326?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9418,-83.4016?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.902543,-83.523012?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.890719,-83.506839?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8944,-83.5028?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.918074,-83.413804?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9339,-83.5459?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.865864,-83.403549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.930475,-83.361442?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.949823,-83.376326?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9418,-83.4016?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.890719,-83.506839?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9418,-83.4016?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/34.0106,-83.4067?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9805,-83.382?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9756,-83.3927?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.969775,-83.38721?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.968,-83.3792?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9455,-83.3542?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.949823,-83.376326?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.907424,-83.36021?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.967564,-83.497176?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;</code></pre>
-<pre class="r"><code># add zip variable to combodata
-combodata &lt;- combodata %&gt;% mutate(revgeo(longitude=combodata$long, 
-                            latitude=combodata$lat, 
-                            provider = &#39;bing&#39;, API = &#39;AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&#39;, output=&quot;frame&quot;, item = &quot;zip&quot;) %&gt;%
-                              select(&quot;zip&quot;))</code></pre>
-<pre><code>## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.902543,-83.523012?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8944,-83.5028?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.918074,-83.413804?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9339,-83.5459?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.865864,-83.403549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.930475,-83.361442?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.902543,-83.523012?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.890719,-83.506839?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8944,-83.5028?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.918074,-83.413804?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9339,-83.5459?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.865864,-83.403549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.930475,-83.361442?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.949823,-83.376326?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9418,-83.4016?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.902543,-83.523012?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.890719,-83.506839?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8944,-83.5028?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.918074,-83.413804?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9339,-83.5459?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.865864,-83.403549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.930475,-83.361442?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.949823,-83.376326?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9418,-83.4016?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.890719,-83.506839?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9232,-83.441?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9245,-83.4549?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9296,-83.4567?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9301,-83.5517?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.925372,-83.522365?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8684,-83.4194?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.867866,-83.416313?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8556,-83.3266?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.881494,-83.389259?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.8906,-83.3765?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9743,-83.425?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.974478,-83.42407?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.95664,-83.402509?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9558,-83.4005?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9418,-83.4016?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/34.0106,-83.4067?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9805,-83.382?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9756,-83.3927?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.969775,-83.38721?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.968,-83.3792?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.9455,-83.3542?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.949823,-83.376326?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.907424,-83.36021?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.967564,-83.497176?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957569,-83.438292?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.958,-83.4368?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.954721,-83.365014?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;
-## [1] &quot;Getting geocode data from Bing: http://dev.virtualearth.net/REST/v1/Locations/33.957,-83.3665?o=json&amp;key=AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ&quot;</code></pre>
+combodata &lt;- readRDS(here(&quot;data&quot;, &quot;processed_data&quot;, &quot;combodata.rds&quot;))</code></pre>
 <p>This function produces the zip codes I am looking for, but there are observations with missing variables that didn’t return addresses and zip codes. I’ll have to work on troubleshooting this. I may be able to manually input the zip codes, but that is not ideal.</p>
-</div>
-<div id="add-population-levels-based-on-zip-code" class="section level1">
-<h1>add population levels based on zip code</h1>
-<pre class="r"><code>#add zipcode information to my original combined dataset
-popdata &lt;- left_join(combodata, zippop, by = c(&quot;zip&quot; = &quot;zipcode&quot;))
-
-
+<div id="renaming-variable-differentiate-use-in-processing" class="section level1">
+<h1>renaming variable differentiate use in processing</h1>
+<pre class="r"><code>popdata &lt;- combodata
 #save data as RDS
-popdata_loc &lt;- here::here(&quot;data&quot;, &quot;processed_data&quot;, &quot;popdata.rds&quot;)
-
-saveRDS(popdata, file = popdata_loc)</code></pre>
+saveRDS(popdata, file = here(&quot;data&quot;, &quot;processed_data&quot;, &quot;popdata.rds&quot;))</code></pre>
 <p>Update 10/25/21</p>
-<p>I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let’s try to use FIPS codes (which include tract info) to obtain population data that might be more informative. # Converting coordinates to FIPS</p>
-<pre class="r"><code>#load census API key
-tidycensus::census_api_key(&quot;c02ef0638e60f9d5fbb45de5219821e3a25cd7d2&quot;, install = TRUE, overwrite = TRUE) </code></pre>
-<pre><code>## Your original .Renviron will be backed up and stored in your R HOME directory if needed.</code></pre>
-<pre><code>## Your API key has been stored in your .Renviron and can be accessed by Sys.getenv(&quot;CENSUS_API_KEY&quot;). 
-## To use now, restart R or run `readRenviron(&quot;~/.Renviron&quot;)`</code></pre>
-<pre><code>## [1] &quot;c02ef0638e60f9d5fbb45de5219821e3a25cd7d2&quot;</code></pre>
-<pre class="r"><code>#create function
-latlong2fips &lt;- function(latitude, longitude) {
-  url &lt;- &quot;https://geo.fcc.gov/api/census/block/find?format=json&amp;latitude=%f&amp;longitude=%f&quot;
-  url &lt;- sprintf(url, latitude, longitude)
-  json &lt;- RCurl::getURL(url)
-  json &lt;- RJSONIO::fromJSON(json)
-  as.character(json$Block[&#39;FIPS&#39;])
-}
-#vectorize so function will take more than one argument
-latlong2fips_vec &lt;- Vectorize(latlong2fips, vectorize.args = &quot;latitude&quot;, &quot;longitude&quot;)
-
-fips &lt;- popdata %&gt;% rowwise() %&gt;% mutate(FIPS = latlong2fips_vec(lat, long))
-
-saveRDS(fips, here(&quot;data&quot;, &quot;processed_data&quot;, &quot;fips.RDS&quot;))</code></pre>
+<p>I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let’s try to use FIPS codes (which include tract info) to obtain population data that might be more informative. I’ve removed the previous code that converted coordinates to zip code and got population based on zip code. This code is now located in <code>ARCHIVE.Rmd</code></p>
+</div>
+<div id="loading-data-with-fips-variable-converted-from-coordinates" class="section level1">
+<h1>Loading data with FIPS variable, converted from coordinates</h1>
+<p>FIPS codes were obtained through a census API run on the local computer, then saved locally and copied into the project directory under <code>raw_data</code> for this analysis. This ensures that the code will be reproducible and consistent even if the API changes in the future.</p>
+<pre class="r"><code>fips &lt;- readRDS(here(&quot;data&quot;, &quot;raw_data&quot;, &quot;fips_copy.RDS&quot;))
+#saveRDS(fips, here(&quot;data&quot;, &quot;processed_data&quot;, &quot;fips.RDS&quot;))</code></pre>
 <p>Here, after attemping to use <code>get_decennial()</code> we receive an error message suggesting to use NHGIS data since the most recent small census geography data is not available through <code>get_decennial()</code>.</p>
 </div>
 <div id="using-nhgis-data-for-more-recent-block-level-population-counts" class="section level1">
 <h1>Using NHGIS data for more recent block-level population counts</h1>
-<pre class="r"><code>#Downloaded data from http://NHGIS.org
+<pre class="r"><code>#Downloaded data from http://NHGIS.org and placed in &quot;raw_data&quot; for this R project. 
 library(ipumsr)
 
 #read in census tract level population data
@@ -708,7 +451,7 @@ c &lt;- left_join(blockpop, tractpop, by = c(&quot;FIPS&quot; = &quot;GEOID&quot
 #This last attempt was successful and we now have a column that gives us the census tract level population count, with no missing values. We no longer need the first column, or the zip code and zip code population data that we looked at initially. Let&#39;s clean up this dataset for further exploration
 
 #Remove first ALUBE001 column and zip, population columns
-tractpopdata &lt;- c %&gt;% select(-&quot;ALUBE001.x&quot;, -&quot;zip&quot;, -&quot;population&quot;)
+tractpopdata &lt;- c %&gt;% select(-&quot;ALUBE001.x&quot;)
 tractpopdata &lt;- rename(tractpopdata, &quot;population&quot; = &quot;ALUBE001.y&quot;)
 
 

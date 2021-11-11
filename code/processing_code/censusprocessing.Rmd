@@ -20,79 +20,40 @@ library(here) #to set paths
 library(tidyverse)
 library(revgeo) #for reverse geocoding coordinates to zipcode
 
-#path to data
-data_location <- here::here("data","raw_data","zippop.xlsx")
-
-#load population data. 
-zippop <- read_excel(data_location)
-
-#load MP data
-data_location1 <- here::here("data","processed_data","combodata.rds")
 
 #load data. 
-combodata <- readRDS(data_location1)
+combodata <- readRDS(here("data", "processed_data", "combodata.rds"))
 ```
 
-# convert lat long to zip
-```{r}
 
-# use Bing API to convert coordinates to corresponding zip code
-zip<-revgeo(longitude=combodata$long, 
-                            latitude=combodata$lat, 
-                            provider = 'bing', API = 'AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ', output="frame", item = "zip")
-
-# add zip variable to combodata
-combodata <- combodata %>% mutate(revgeo(longitude=combodata$long, 
-                            latitude=combodata$lat, 
-                            provider = 'bing', API = 'AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ', output="frame", item = "zip") %>%
-                              select("zip"))
-```
 
 This function produces the zip codes I am looking for, but there are observations with missing variables that didn't return addresses and zip codes. I'll have to work on troubleshooting this. I may be able to manually input the zip codes, but that is not ideal. 
 
-# add population levels based on zip code
+# renaming variable differentiate use in processing
 ```{r}
-#add zipcode information to my original combined dataset
-popdata <- left_join(combodata, zippop, by = c("zip" = "zipcode"))
-
-
+popdata <- combodata
 #save data as RDS
-popdata_loc <- here::here("data", "processed_data", "popdata.rds")
-
-saveRDS(popdata, file = popdata_loc)
+saveRDS(popdata, file = here("data", "processed_data", "popdata.rds"))
 
 ```
 
 Update 10/25/21
 
-I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let's try to use FIPS codes (which include tract info) to obtain population data that might be more informative. 
-# Converting coordinates to FIPS
+I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let's try to use FIPS codes (which include tract info) to obtain population data that might be more informative. I've removed the previous code that converted coordinates to zip code and got population based on zip code. This code is now located in `ARCHIVE.Rmd`
+
+# Loading data with FIPS variable, converted from coordinates
+
+FIPS codes were obtained through a census API run on the local computer, then saved locally and copied into the project directory under `raw_data` for this analysis. This ensures that the code will be reproducible and consistent even if the API changes in the future. 
 ```{r}
-#load census API key
-tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE, overwrite = TRUE) 
-
-#create function
-latlong2fips <- function(latitude, longitude) {
-  url <- "https://geo.fcc.gov/api/census/block/find?format=json&latitude=%f&longitude=%f"
-  url <- sprintf(url, latitude, longitude)
-  json <- RCurl::getURL(url)
-  json <- RJSONIO::fromJSON(json)
-  as.character(json$Block['FIPS'])
-}
-#vectorize so function will take more than one argument
-latlong2fips_vec <- Vectorize(latlong2fips, vectorize.args = "latitude", "longitude")
-
-fips <- popdata %>% rowwise() %>% mutate(FIPS = latlong2fips_vec(lat, long))
-
-saveRDS(fips, here("data", "processed_data", "fips.RDS"))
+fips <- readRDS(here("data", "raw_data", "fips_copy.RDS"))
+#saveRDS(fips, here("data", "processed_data", "fips.RDS"))
 ```
-
 
 Here, after attemping to use `get_decennial()` we receive an error message suggesting to use NHGIS data since the most recent small census geography data is not available through `get_decennial()`.
 
 # Using NHGIS data for more recent block-level population counts
 ```{r}
-#Downloaded data from http://NHGIS.org
+#Downloaded data from http://NHGIS.org and placed in "raw_data" for this R project. 
 library(ipumsr)
 
 #read in census tract level population data
@@ -129,7 +90,7 @@ c <- left_join(blockpop, tractpop, by = c("FIPS" = "GEOID"))
 #This last attempt was successful and we now have a column that gives us the census tract level population count, with no missing values. We no longer need the first column, or the zip code and zip code population data that we looked at initially. Let's clean up this dataset for further exploration
 
 #Remove first ALUBE001 column and zip, population columns
-tractpopdata <- c %>% select(-"ALUBE001.x", -"zip", -"population")
+tractpopdata <- c %>% select(-"ALUBE001.x")
 tractpopdata <- rename(tractpopdata, "population" = "ALUBE001.y")
 
 
@@ -137,5 +98,4 @@ tractpopdata <- rename(tractpopdata, "population" = "ALUBE001.y")
 saveRDS(tractpopdata, file = here("data", "processed_data", "tractpopdata.rds"))
 
 ```
-
 
