@@ -3,7 +3,7 @@ title: "modeling"
 output: html_document
 ---
 
-In this portion of the analysis, we will use the LASSO method for regularization of the model. 
+In this portion of the analysis, we will use the LASSO method for regularization of the model. We'll also try out a decision tree
 
 # load packages and data
 ```{r}
@@ -16,6 +16,7 @@ library(glmnet)
 library(ranger)
 library(rpart.plot)  # for visualizing a decision tree
 library(vip)         # for variable importance plots
+library(gridExtra)
 
 #path to data
 #note the use of the here() package and not absolute paths
@@ -160,13 +161,13 @@ lasso_resid <- lasso_fit %>%
 
 #model predictions from tuned model vs actual outcomes
 lasso_pred_plot <- ggplot(lasso_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
-  labs(title = "Predictions vs Actual Outcomes: LASSO", x = "Particles/L Outcome", y = "Particles/L Prediction")
+  labs(title = "LASSO: Pred vs Outcomes", x = "Particles/L Outcome", y = "Particles/L Prediction")
 lasso_pred_plot
 
 
 #plot residuals vs predictions
 lasso_resid_plot <- ggplot(lasso_resid, aes(y = .resid, x = .pred)) + geom_point() + 
-  labs(title = "Predictions vs Residuals: LASSO", x = "Particles/L Prediction", y = "Residuals")
+  labs(title = "LASSO: Pred vs Residuals", x = "Particles/L Prediction", y = "Residuals")
 lasso_resid_plot #view plot
 
 #compare to null model
@@ -179,7 +180,7 @@ next I want to see what predictors are used in the best lasso model. also need t
 
 RMSE for best LASSO model is 100.5, compared to 109.4 RMSE for the null model. Still need to check included predictors for the best LASSO model. 
 
-#plot for how the number of predictors included in the LASSO model changes with the tuning parameter
+# plot for how the number of predictors included in the LASSO model changes with the tuning parameter
 ```{r}
 x <- lasso_fit$fit$fit$fit 
 plot(x, "lambda")
@@ -195,12 +196,202 @@ By looking at the predictors used in this fit, we see there are a lot of uninfor
 
 Try modeling with data subset, including these variables: "particles_l", "visual_score", "turbidity.ntu", "temperature.c", "e.coli.cfu", "population", "dist". We'll do this in a separate Rmd document called `subset_modeling.Rmd`
 
+# Decision tree
+Next, we'll try out a decision tree model
 
+## Decision tree
+```{r}
+#going based off of tidymodels tutorial: tune parameters
+#since we already split our data into test and train sets, we'll continue to use those here. they are `train_data` and `test_data`
 
+#model specification
+tune_spec <- 
+  decision_tree(
+    cost_complexity = tune(),
+    tree_depth = tune()
+  ) %>% 
+  set_engine("rpart") %>% 
+  set_mode("regression")
+tune_spec
 
+#tuning grid specification
+tree_grid <- grid_regular(cost_complexity(),
+                          tree_depth(),
+                          levels = 5)
+tree_grid
 
+#cross validation
+set.seed(123)
+cell_folds <- vfold_cv(train_data)
 
+#workflow
+set.seed(123)
 
+tree_wf <- workflow() %>%
+  add_model(tune_spec) %>%
+  add_recipe(MP_rec)
 
+#model tuning with `tune_grid()`
+tree_res <- 
+  tree_wf %>% 
+  tune_grid(
+    resamples = cell_folds,
+    grid = tree_grid
+    )
+tree_res %>% collect_metrics()
+#Here we see 25 candidate models, and the RMSE and Rsq for each
+tree_res %>% autoplot() #view plot
+
+#select the best decision tree model
+best_tree <- tree_res %>% select_best("rmse")
+best_tree #view model details
+
+#finalize model workflow with best model
+tree_final_wf <- tree_wf %>%
+  finalize_workflow(best_tree) 
+
+#fit model
+tree_fit <- 
+  tree_final_wf %>% fit(train_data)
+tree_fit
 
 ```
+
+
+### Decision tree plots
+```{r}
+#diagnostics
+autoplot(tree_res)
+#calculate residuals - originally got stuck trying out lots of different methods for this. took inspiration from Zane's code to manually calculate residuals rather than using some of the built in functions that I could not get to cooperate
+tree_resid <- tree_fit %>%
+  augment(train_data) %>% #this will add predictions to our df
+  select(.pred, particles_l) %>%
+  mutate(.resid = particles_l - .pred) #manually calculate residuals
+
+#model predictions from tuned model vs actual outcomes
+tree_pred_plot <- ggplot(tree_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
+  labs(title = "Decision Tree: Pred vs Outcomes", x = "Particles/L Outcome", y = "Particles/L Prediction")
+tree_pred_plot
+
+#plot residuals vs predictions
+tree_resid_plot <- ggplot(tree_resid, aes(y = .resid, x = .pred)) + geom_point() + 
+  labs(title = "Decision Tree: Pred vs Residuals", x = "Particles/L Prediction", y = "Residuals")
+tree_resid_plot #view plot
+
+#compare to null model
+metrics_null_train #view null RMSE for train data
+tree_res %>% show_best(n=1) #view RMSE for best decision tree model
+```
+
+The best decision tree has an RMSE of 102.2, which is better than the null model RMSE of 109. However, the decision tree did not perform as well well as the Lasso regularized model, which had an RMSE of about 100. 
+
+# Random forest
+Finally, let's try out a random forest. 
+
+### split data into train and test subsets with only COMPLETE CASES
+```{r}
+data %>% is.na() %>% summary() #check out missing cases
+complete <- data %>% na.omit() #save complete cases
+complete <- complete %>% select(-"visual_score")
+
+# set seed for reproducible analysis (instead of random subset each time)
+set.seed(123)
+#subset 3/4 of data as training set
+data_split <- initial_split(complete, 
+                            prop = 7/10, 
+                            strata = particles_l) #stratify by MP concentration for balanced outcome
+
+#save sets as data frames
+train_data <- training(data_split)
+test_data <- testing(data_split)
+
+#reset recipe with adjusted, complete data
+MP_rec <- recipe(particles_l ~ ., data = train_data) %>% step_dummy(all_nominal())
+#reset cell_folds
+set.seed(123)
+cell_folds <- vfold_cv(train_data)
+```
+
+## Random forest
+```{r}
+#based on tidymodels tutorial: case study
+library(parallel)
+cores <- parallel::detectCores()
+cores
+#model specification
+r_forest <- rand_forest(mtry = tune(), min_n = tune(), trees = tune()) %>% set_engine("ranger", num.threads = cores) %>% set_mode("regression")
+
+#set workflow
+r_forest_wf <- workflow() %>% add_model(r_forest) %>% add_recipe(MP_rec)
+
+#tuning grid specification
+rf_grid  <- expand.grid(mtry = c(3, 4, 5, 6), min_n = c(40,50,60), trees = c(500,1000)  )
+#what we will tune:
+r_forest %>% parameters()
+
+#tuning with CV and tune_grid
+
+r_forest_res <- 
+  r_forest_wf %>%
+  tune_grid(resamples = cell_folds, 
+            grid = rf_grid, 
+            control = control_grid(save_pred = TRUE), 
+            metrics = metric_set(rmse))
+
+#view top models
+r_forest_res %>% show_best(metric = "rmse")
+
+#view plot of models performance
+autoplot(r_forest_res)
+
+#select best model
+rf_best <- r_forest_res %>% select_best(metric = "rmse")
+rf_best
+
+#finalize workflow with top model
+rf_final_wf <- r_forest_wf %>% finalize_workflow(rf_best)
+
+#fit model with finalized WF
+rf_fit <- rf_final_wf %>% fit(train_data)
+```
+Here, we get an error message that all models failed, note: missing value in visual_score. Let's go back and use only complete cases for the random forest. 
+
+The issue was in "cell_folds" which had originated earlier in the Rmd and didn't include the updated complete case dataset. Added a line of code to reset cell_folds at this stage of the Rmd in order to use complete cases only. We still get some error messages but are able to run the model. 
+
+The best random forest models have RMSEs of about 108. This is slightly better than the null model, but not significantly. The random forest model does not perform as well as the decision tree or LASSO model. 
+
+### Random forest plots
+```{r}
+#diagnostics
+autoplot(r_forest_res)
+#calculate residuals
+rf_resid <- rf_fit %>%
+  augment(train_data) %>% #this will add predictions to our df
+  select(.pred, particles_l) %>%
+  mutate(.resid = particles_l - .pred) #manually calculate residuals
+
+#model predictions from tuned model vs actual outcomes
+rf_pred_plot <- ggplot(rf_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
+  labs(title = "Random Forest: Pred vs Outcomes", x = "Particles/L Outcome", y = "Particles/L Prediction")
+rf_pred_plot
+
+
+#plot residuals vs predictions
+rf_resid_plot <- ggplot(rf_resid, aes(y = .resid, x = .pred)) + geom_point() + 
+  labs(title = "Random Forest: Pred vs Residuals", x = "Particles/L Prediction", y = "Residuals")
+rf_resid_plot #view plot
+
+#compare to null model
+metrics_null_train #view null RMSE for train data
+r_forest_res %>% show_best(n=1) #view RMSE for best decision tree model
+```
+
+
+
+```{r}
+model_grid <- grid.arrange(lasso_pred_plot, lasso_resid_plot, rf_pred_plot, rf_resid_plot, tree_pred_plot, tree_resid_plot, ncol = 3)
+
+ggsave(model_grid, filename = here("results", "model_grid.png"))
+```
+
+I'll need to go back and edit this image later so that the titles aren't cut off and the axis scales match up properly so the plots look right. I might also want to add a 45 degree diagonal line to the outcomes vs predictions plot, and some other features to improve appearance. 

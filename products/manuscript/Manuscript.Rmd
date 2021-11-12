@@ -132,12 +132,6 @@ There is some seasonal variation in concentration at each individual site. Figur
 knitr::include_graphics("../../results/seasonalconc_bysite.png")
 ```
 
-There are similar microplastic levels throughout the watersheds within the Upper Oconee. Some watersheds experienced greater variation in microplastic levels than other watersheds. Figure \@ref(fig:conc-bywatershed) shows the microplastic concentrations by watershed. 
-
-```{r conc-bywatershed,  fig.cap='Watershed Microplastic Concentrations', echo=FALSE}
-knitr::include_graphics("../../results/conc_bywatershed.png")
-```
-
 Figure \@ref(fig:watershed-overtime) shows a line graph of the mean watershed microplastic concentrations at each seasonal sampling date. 
 
 ```{r watershed-overtime,  fig.cap='Microplastic Concentration Over Time', echo=FALSE}
@@ -145,32 +139,22 @@ knitr::include_graphics("../../results/watershed_overtime.png")
 ```
 
 ### Predictors
-Population, land cover/use, and bacteria levels are hypothesized predictors of microplastic concentration. Figure \@ref(fig:particlesvpop) and Figure \@ref(fig:logmpvcfu) demonstrate the relationship between microplastic concentration and population and microplastic concentration and bacteria levels (CFU/L), respectively. 
+Population, land cover/use, and bacteria levels are hypothesized predictors of microplastic concentration. Figure \@ref(fig:logparticlesvpop) and Figure \@ref(fig:logmpvcfu) demonstrate the relationship between microplastic concentration and population and microplastic concentration and bacteria levels (CFU/L), respectively. 
 
-```{r particlesvpop,  fig.cap="Particles/L vs Population", echo=FALSE}
-knitr::include_graphics("../../results/particlesvpop.png")
+```{r logparticlesvpop,  fig.cap="Particles/L vs Population", echo=FALSE}
+knitr::include_graphics("../../results/logparticlesvpop.png")
 ```
 
 ```{r logmpvcfu,  fig.cap='Log particles/L vs CFU', echo=FALSE}
 knitr::include_graphics("../../results/logmpvcfu.png")
 ```
 
-Figure \@ref(fig:matrix) and Figure \@ref(fig:landmatrix) show correlation matrices for the hypothesized predictor and for the different categories of land use. 
-
-```{r matrix,  fig.cap='Predictor matrix', echo=FALSE}
-knitr::include_graphics("../../results/matrix.png")
-```
-
-```{r landmatrix,  fig.cap='Land cover matrix', echo=FALSE}
-knitr::include_graphics("../../results/landmatrix.png")
-```
-
 ## Full analysis
 
-Preliminary modeling reveals that there is not a strong relationship between microplastic concentration and population level. Figure \@ref(fig:m-concvpop-no-outlier) demonstrates a linear model fit. 
+Preliminary modeling reveals that there is not a strong relationship between microplastic concentration and population level. Figure \@ref(fig:m-logconcvpop) demonstrates a linear model fit. 
 
-```{r m-concvpop-no-outlier,  fig.cap='Concentration vs Population Linear Model', echo=FALSE}
-knitr::include_graphics("../../results/m_concvpop_no_outlier.png")
+```{r m-logconcvpop-no-outlier,  fig.cap='Concentration vs Population Linear Model', echo=FALSE}
+knitr::include_graphics("../../results/m_logconcvpop.png")
 ```
 
 Figure \@ref(fig:m-logconcvcfu) shows a linear model of microplastic concentration vs CFU (both variables log-transformed). 
@@ -191,6 +175,13 @@ Table \@ref(tab:lmfittable) shows a table summarizing a linear model fit predict
 lm_fit_table=readRDS("../../results/lm_fit_table.rds")
 knitr::kable(lm_fit_table, caption = 'Linear model fit table.')
 ```
+
+Beyond the basic linear model, we have applied additional methods to improve model performance, including LASSO regularization and building decision trees and random forests for model comparison. The predictions, outcomes, and residuals resulting from each type of plot are demonstrated in Figure \@ref(fig:model-grid)
+
+```{r model-grid, fig.cap='Model Quality', echo=FALSE}
+knitr::include_graphics("../../results/model_grid.png")
+```
+
 
 
 # Results
