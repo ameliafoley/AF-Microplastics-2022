@@ -22,3 +22,16 @@ The mpprocessing.R is the initial code to load, clean, and wrangle the raw data.
 7. *analysis.Rmd*
  - requires: mpwrfcombo
  - produces: various modeling fits, subset_data.rds
+8. *modeling.Rmd*
+ - requires: mpwrfcombo
+ - produces: model_grid and individual plots for model performance
+9. *subset_modeling.Rmd*
+ - requires: data_subset
+ - produces: LASSO fit on a subset of data
+10. *land_model.Rmd*
+ - requires: athensland
+ - produces: LASSO model including land use data
+11. *mapping.R*
+ - requires: athensland
+ - produces: map.png, map_fall.html, etc. 
+ 
