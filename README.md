@@ -19,6 +19,20 @@ Some thoughts going forward:
  - Having issues with figuring numbering in the `Manuscript.Rmd` word doc output; also trying to customize style output to fit certain publishing requirements
  - Not seeing super obvious relationships between outcome/predictors - unsure about the quality of modeling I'll be able to produce (?)
  - Still need to write up a section on data processing/wrangling to include in the manuscript (with main code in the supplementary file)
+ 
+# Project Part 4: Completing Analysis
+I have performed a series of models with my data, including random forest, decision tree, and LASSO. I have determined that LASSO is the best of the three models, though it's performance is only marginally better than the null model performance. 
+
+I have made additions to my background section/writing component. I have also included watershed maps with sample sites, color-coordinated based on level of microplastic concentration. I have a map for each season, but am still working on how to include them in the `Manuscript.Rmd` file. 
+
+There is now a `Supplement.Rmd` file where I have begun to add some EDA figures, and will continue to add as I refine my manuscript. 
+
+Areas I know that I still need to work on are:
+ - Demonstrating the results of my modeling/analysis (from `modeling.Rmd` and `land_model.Rmd`) in my manuscript. Basically, interpreting the models (not just comparing them). 
+ - Improving aesthetics for my current EDA and other figures 
+ - Writing out explicitly the analysis results in my manuscript
+ - Combining many of my Markdowns and scripts together to make my project more accessible for reproducing
+ - Fixing figure numbers in manuscript
 
 
 # Reproducing this project
@@ -30,6 +44,9 @@ All required data files are located within this R.project file on GitHub. Run sc
 5. wrfprocessing.Rmd
 6. exploration.Rmd
 7. analysis.Rmd
-
+8. modeling.Rmd
+9. land_model.Rmd
+10. mapping.R
+11. Manuscript.Rmd
 
 
