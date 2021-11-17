@@ -46,7 +46,6 @@ All required data files are located within this R.project file on GitHub. Run sc
 7. analysis.Rmd
 8. modeling.Rmd
 9. land_model.Rmd
-10. mapping.R
-11. Manuscript.Rmd
+10. Manuscript.Rmd
 
 
