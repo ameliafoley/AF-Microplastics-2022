@@ -1,0 +1,49 @@
+---
+title: "Project Proposal"
+output: html_document
+---
+
+```{r, include=FALSE}
+#load needed packages. make sure they are installed.
+library(readxl) #for loading Excel files
+library(dplyr) #for data processing
+library(here) #to set paths
+```
+
+# Project Part 1
+The data that I will use for this project is from my personal undergraduate research project on freshwater microplastics in Athens, GA. The study is ongoing and was conducted in collaboration with the Upper Oconee Watershed Network (UOWN) via their quarterly sampling events. There is one year’s worth of quarterly data, with the following sample dates: November 2020, February 2021, April 2021, and July 2021. The data include variables such as sample site, latitude and longitude, watershed location, and duplicate A and B counts of microplastics observed per filter. For the most recent sampling date, July 2021, there is additional data where a second counting session was performed, in order to assess the comparability of parallel counts. There are about 136 observations of ~10 variables in total in the dataset. The independent variables – site location, coordinates, watershed location, etc – were retrieved from UOWN. Values for microplastic counts were recorded based on visual identification via a dissecting microscope, performed by myself and by a small team of <10 volunteers. 
+
+The questions that I want to answer with this data include the following:
+ - Can we characterize microplastics in Athens, GA using a citizen science approach? 
+ -	What are the levels of microplastics like in Athens, GA overall? 
+ -	How do microplastic levels differ based on location within the region? 
+
+Questions that I want to answer that will require gathering more data using coordinates/watershed info include:
+ -	Is microplastic concentration impacted by local land use? 
+ -	Is microplastic concentration impacted by localized population levels in specific neighborhoods?
+ -	Does wastewater treatment plant effluent from nearby facilities increase microplastic concentration at affected sites?
+ -	Are microplastic levels correlated to bacteria levels measured at the same sites? 
+These questions also relate to hypothesized predictors of microplastic pollution: population level, land use, wastewater treatment plant effluent, and microbial water quality. 
+
+My ideas for how to analyze this data include using non-parametric statistical tests, correlation matrices, and modeling (?) to characterize and compare observations. 
+
+There are just a few aspects of data collection for the July quarterly (which I will finish up in the next week or so) but I already have most of my data. Note that the July data (about 1/4 of the data) is still being finalized and is not currently included in the data below. 
+
+## Data Preview
+```{r}
+#path to data
+data_location <- here::here("data","raw_data","mpdata_ALL.xlsx")
+
+rawdata <- readxl::read_excel(data_location)
+
+dplyr::glimpse(rawdata)
+
+summary(rawdata)
+```
+
+I have been working on a preliminary introduction to this study, which provides background information on the data and may be helpful. My working draft is below (improved system for references coming soon).  
+
+## Background
+In the past two decades, the study of microplastics has expanded exponentially. Since the earliest paper mentioning small plastic particles in the ocean was published in the 1970s, before the term “microplastics” even existed, researchers across the globe have quantified microplastic particle levels in both marine and freshwater environments, assessed potential drivers and predictors of microplastic pollution, examined the presence of microplastics in the food chain, and explored the potential human health impacts of ingested microplastics (Carpenter et al., 1972). Though the body of research on microplastics has grown in recent years, many knowledge gaps remain regarding this pollutant. The term microplastics was first coined in 2004, and today microplastics are defined as plastic particles smaller in size than 5 mm, though some studies examine particles as large as 20 mm (Thompson et al., 2004; Yang et al., 2019; Hidalgo et al., 2012). Years of sampling, experimentation, and progress in research methods tell researchers that microplastics are a persistent class of pollutant and are found worldwide in a diverse assemblage of forms (Barboza et al., 2018).
+
+Through decades of research, the scientific community proves that microplastics are ubiquitous, having identified microplastics in oceans, rivers, lakes, and other water bodies across the globe, including remote mountain lakes, the bottom of the ocean, and in ocean sediments offshore of Antarctica (Free et al., 2014; Waller et al 2017, Peng et al., 2018). Modeling of current and future plastic production and pollution indicates that plastics are so pervasive that they have been considered as a geological indicator of the proposed Anthropocene era (Zalasiewicz et al., 2016). These models also suggest that microplastic concentrations will only increase in the future (Geyer, Jambeck, & Law, 2017; Barboza et al., 2018, Prokic et al., 2019; Evereart et al., 2018). In a 2018 paper, Barboza and collaborators state that the increase in environmental microplastics is particularly concerning due to the contaminants’ small size, the limited technology for quantifying their presence, and their potential for adversely affecting both marine biota and humans (Barboza et al., 2018). Further, research shows that microplastic pollution is largely due to land-based sources; ocean-based sources such as commercial fishing, vessels, and other activities, contribute only 20% of the total plastic debris, while terrestrial activity contributes the other 80% of pollution in the marine environment (Andrady et al., 2011; Li et al., 2018). Microplastics with various terrestrial origins mainly enter the marine environment via rivers, releasing most microplastics to the ocean and retaining some in freshwater systems (Free et al., 2014; Li et al., 2018; Browne et al., 2010; Lebreton et al., 2017). However, a majority of microplastics research to date has focused on marine settings rather than freshwater, indicating that more studies are required in this area (Besseling et al., 2018; Dris et al., 2015). Examining freshwater systems as the dominant source of microplastics will lead to a better overall understanding of microplastics pollution input and therefore insight into the scale of the issue and mitigation strategies (Lebreton et al., 2017).
