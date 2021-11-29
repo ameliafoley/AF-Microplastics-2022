@@ -26,6 +26,7 @@ library(tidyverse)
 library(ggplot2)
 library(GGally) #for producing correlation matrices
 library(gridExtra) #
+library(gtsummary)
 
 
 #path to data

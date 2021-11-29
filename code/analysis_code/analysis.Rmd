@@ -14,6 +14,7 @@ library(broom) #for cleaning up output from lm()
 library(here) #for data loading/saving
 library(tidymodels) #for modeling
 library(gridExtra) #for exporting tables
+library(gridExtra) #for savings images in grids
 
 data <- readRDS(here("data", "processed_data", "mpwrfcombo.rds"))
 ```
@@ -46,7 +47,7 @@ ggsave(filename = here("results","m_concvpop_no_outlier.png"), plot=m2)
 #attempt to visualize data
 #look at particles per L vs population
 m3 <- ggplot(data, aes(x = population, y = particles_l)) + geom_point() +
-  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Population", x = "Population", y = "Log(Particles/Liter)")
+  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "MP Concentration vs. Population", x = "Population", y = "Log(Particles/Liter)")
 
 plot(m3)
 #save figure
@@ -65,7 +66,7 @@ ggsave(filename = here("results","m_concvcfu.png"), plot=m4)
 # particles per liter vs e.coli.cfu with log transformation
 ```{r}
 m5 <- ggplot(data, aes(x = e.coli.cfu, y = particles_l)) + geom_point() + scale_x_continuous(trans='log10') +
-  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. E. coli CFU", x = "Log(CFU/mL)", y = "Log(Particles/Liter)")
+  scale_y_continuous(trans='log10') + geom_smooth(method = lm) + labs(title = "MP Concentration vs. E. coli CFU", x = "Log(CFU/mL)", y = "Log(Particles/Liter)")
 
 plot(m5)
 #save figure
@@ -116,7 +117,8 @@ data %>% is.na() %>% summary() #check out missing cases
 complete <- data %>% na.omit() #save complete cases
 ```
 
-Trying code from above again with the complete dataset
+Let's try the code from above again with the complete dataset
+
 # Modeling with complete cases only
 ```{r}
 #estimating/training linear model
@@ -137,8 +139,6 @@ tidy(lm_fit6)
 comp5_6 <- anova(lm_fit5$fit, lm_fit6$fit, test = "Chisq")
 comp5_6
 ```
-
-Here, we have a VERY large RSS, which I think indicates a poor model fit for our data. Let's try with some variables removed. If an RSS of 0 is a perfect model, our RSS of 2 million is either a *very bad* model or I am making some sort of error/misinterpreting(?). 
 
 # Modeling single predictors with complete cases
 ```{r}
@@ -216,7 +216,7 @@ tidy(turb_fit1)
 
 
 #visualize linear model
-t1 <- ggplot(data, aes(x = turbidity.ntu, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "Microplastic Concentration vs. Turbidity", x = "Turbidity (ntu)", y = "Particles/Liter")
+t1 <- ggplot(data, aes(x = turbidity.ntu, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "MP Concentration vs. Turbidity", x = "Turbidity (ntu)", y = "Particles/Liter")
 t1
 #save figure
 ggsave(filename = here("results","m_concvturbidity.png"), plot=t1)
@@ -253,3 +253,27 @@ turb_aug %>% rmse(truth = particles_l, .pred)
 Here, we see that a model with turbidity as the single predictor produces an RMSE of 58. This is significantly better than the full, all-predictor model which had an RMSE of 101. 
 
 Going forward, perhaps we could add in additional predictors one at a time to determine what predictors may improve the model performance. 
+
+# linear model for distance from WRF
+```{r}
+#estimating/training linear model
+wrf_fit1 <- lm_mod %>% fit(particles_l ~ dist, data = data)
+#view summary of fit
+tidy(wrf_fit1)
+
+
+#visualize linear model
+wrf1 <- ggplot(data, aes(x = dist, y = particles_l)) + geom_point() + geom_smooth(method = lm) + labs(title = "MP Concentration vs. WRF Distance", x = "WRF Distance (m)", y = "Particles/Liter")
+wrf1
+#save figure
+ggsave(filename = here("results","m_concvwrfdist.png"), plot=wrf1)
+```
+# save grid image of results
+```{r}
+# arrange grid with population, e coli, WRF, and turbidity predictive models
+bivar_grid <- grid.arrange(m3, m5, t1, wrf1, ncol = 2)
+
+# save and export image
+ggsave(bivar_grid, filename = here("results", "bivar_grid.png"))
+```
+

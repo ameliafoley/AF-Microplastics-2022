@@ -573,8 +573,7 @@ null_fit_test &lt;- fit_resamples(null_test_wflow, resamples = folds) #performs 
 <p>Include: 1. Model specification 2. Workflow definition 3. Tuning grid specification 4. Tuning w/ cross-validation + <code>tune_grid()</code></p>
 <div id="lasso-model" class="section level2">
 <h2>LASSO model</h2>
-<pre class="r"><code>#based on tidymodels tutorial: case study
-#cross validation
+<pre class="r"><code>#cross validation
 set.seed(123)
 cell_folds &lt;- vfold_cv(train_data)
 

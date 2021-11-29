@@ -27,9 +27,7 @@ combodata <- readRDS(here("data", "processed_data", "combodata.rds"))
 
 
 
-This function produces the zip codes I am looking for, but there are observations with missing variables that didn't return addresses and zip codes. I'll have to work on troubleshooting this. I may be able to manually input the zip codes, but that is not ideal. 
-
-# renaming variable differentiate use in processing
+# renaming variable to differentiate use in processing
 ```{r}
 popdata <- combodata
 #save data as RDS

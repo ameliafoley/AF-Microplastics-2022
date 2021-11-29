@@ -3,7 +3,7 @@ title: "subset_modeling"
 output: html_document
 ---
 
-In this portion of the analysis, we will perform modeling on a smaller subset of data in attempt to improve model performance. 
+In this portion of the analysis, we will perform modeling on a smaller subset of data in attempt to improve model performance. The original aim of this document was to perform feature selection/subsetting for model improvement. However, the implementation of the LASSO method eliminated the need for this by essentially automating subset selection. The contents of this document are needed for the final analysis/manuscript product, but are kept in the project repository for understanding of the whole analysis process. 
 
 # load packages and data
 ```{r}
@@ -108,14 +108,17 @@ Include:
 
 ## LASSO model
 ```{r}
-#based on tidymodels tutorial: case study
+
 #cross validation
 set.seed(123)
 cell_folds <- vfold_cv(train_data)
 
 #model specification
-lasso <- linear_reg(penalty = tune()) %>% set_engine("glmnet") %>% set_mode("regression")
-
+#lasso <- linear_reg(penalty = tune()) %>% set_engine("glmnet") %>% set_mode("regression")
+lasso <- linear_reg() %>%
+  set_mode("regression") %>%           
+  set_engine("glmnet") %>%
+  set_args(penalty = tune(), mixture = 1)
 #set workflow
 lasso_wf <- workflow() %>% add_model(lasso) %>% add_recipe(MP_rec)
 
@@ -211,30 +214,28 @@ The results we get from the initial machine learning modeling and from the model
 - could try ridge regression for alternate form of regularization 
 - could try decision tree (though we learned these usually don't perform as well as LASSO)
 
+# Model selection : LASSO
 ```{r}
-#check for Poisson distribution
-#https://stackoverflow.com/questions/59809960/how-do-i-know-if-my-data-fit-a-poisson-distribution-using-r
-dispersion_test <- function(x) 
-{
-  res <- 1-2 * abs((1 - pchisq((sum((x - mean(x))^2)/mean(x)), length(x) - 1))-0.5)
+#We've selected the LASSO model. Let's evaluate it with the test data. 
 
-  cat("Dispersion test of count data:\n",
-      length(x), " data points.\n",
-      "Mean: ",mean(x),"\n",
-      "Variance: ",var(x),"\n",
-      "Probability of being drawn from Poisson distribution: ", 
-      round(res, 3),"\n", sep = "")
-
-  invisible(res)
-}
-
-set.seed(1)
-x <- data$particles_l
-
-dispersion_test(x)
+#fit to test data
+last_lasso_fit <- lasso_final_wf %>% last_fit(data_split)
+last_lasso_fit %>% collect_metrics()
 ```
 
+It appears that the lasso model receives an RMSE of ~197 when run with the test data. Compared to the RMSE of 113 with the train data, this is not great performance and indicates that the model overfits the train data. 
 
+# Variable importance
+```{r}
+library(parsnip)
+last_lasso_fit %>% 
+  purrr::pluck(".workflow", 1) %>%   
+  workflows::extract_fit_parsnip() %>% 
+  vip(num_features = 20)
+
+```
+
+This plot shows us the variable importance rankings for the LASSO model, and we see that the watershed identity of each each sample site has importance for predicting microplastics concentration, while the hypothesized predictors (population, distance from WWTP, turbidity, e.coli.cfu, visual score) do not have importance in this model. 
 
 
 

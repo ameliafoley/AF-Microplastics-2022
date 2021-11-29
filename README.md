@@ -33,7 +33,9 @@ Areas I know that I still need to work on are:
  - Writing out explicitly the analysis results in my manuscript
  - Combining many of my Markdowns and scripts together to make my project more accessible for reproducing
  - Fixing figure numbers in manuscript
-
+ 
+# Project Part 5: Full Project for Peer Review
+Previous analyses have been intepreted and added to the Results section. Extra figures have been relocated from the Manuscript to the Supplement. The Results and Discussion sections have been added to and polished. Some previous errors in code have been edited/addressed. 
 
 # Reproducing this project
 All required data files are located within this R.project file on GitHub. Run scripts in this order:
@@ -46,6 +48,10 @@ All required data files are located within this R.project file on GitHub. Run sc
 7. analysis.Rmd
 8. modeling.Rmd
 9. land_model.Rmd
-10. Manuscript.Rmd
+10. map_images.Rmd
+11. Manuscript.Rmd
+12. Supplement.Rmd
+
+A more detailed description of the steps for reproduction can also be found in the `Supplement.Rmd` file. 
 
 

@@ -11,26 +11,71 @@ output:
     number_sections: true
     global_numbering: true
     fig_caption: yes
-    #reference_docx: style_template.docx #working on creating a template doc with the appropriate style for the conference I am attending next summer (ASTM) so that my manuscript can be automatically formatted
   bookdown::html_document2: 
     toc: false
 bibliography: library.bib 
 csl: elsevier.csl
 ---
 
+# Documentation for Supplementary Files
+Code and data files required to reproduce this analysis are available on [GitHub](https://github.com/ameliafoley/AmeliaFoley-MADA-project)
 
-## Exploratory analysis
+* "**AmeliaFoley-MADA-project.Rproj**" Establishes relative file paths
+* "**README.md**" Provides brief order of scripts for reproducing; summarizes project parts
+* "**code**" folder contains all code for processing and analysis
+  + "**analysis_code**"
+    + analysis.Rmd performs linear regression on single predictors and full predictor sets
+    + exploration.Rmd contains the exploratory data analysis
+    + land_model.Rmd contains statistical models on land cover data
+    + modeling.Rmd is the main analysis file containing final models (LASSO)
+    + subset_modeling.Rmd is an additional analysis file performing models on subsets of data; it is not used for the manuscript
+  + "**processing_code**"
+    + censusland_code.Rmd combines land cover data with microplastic data
+    + censusprocessing.Rmd imports census tract population data
+    + map_images.Rmd combines individual map images to produce a grid
+    + mpprocessing.R processes the original microplastic data file and saves cleaned data
+    + uownprocessing.Rmd imports additional water quality data from UOWN.org
+    + wrfprocessing.Rmd imports distance for nearest water reclamation facility
+  + "**readme.md**" provides an order and brief description of dependencies/outputs for processing code files
+* "**data**" folder contains all raw and processed data
+* "**products**" folder contains files to produce the Manuscript and Supplement
+  + "**manuscript**" contains files for producing the manuscript
+    + apa.csl optional format for citations
+    + elsevier.csl optional format for citations
+    + library.bib contains references
+    + Manuscript.docx result of knitting the markdown
+    + Manuscript.Rmd creates basic manuscript word document
+    + style_template.docx placeholder to add special formatting to manuscript
+    + Supplement.Rmd creates basic supplemental material word document
+    + Supplement.docx result of knitting markdown file
+* "**results**" folder contains all plots, tables, figures produced in data analysis
 
-This section will contain the key products of my exploratory analysis (located in exploration.Rmd) when complete. Since I am keeping this document in manuscript style, I will keep processing/exploration/analysis code separate. 
+# Reproducing results
+Reproducing this project requires R, RStudio, and Microsoft Word. Files should be run in the following order. 
 
-Table \@ref(tab:summarytable) shows a table summarizing the data.
-```{r summarytable,  echo=FALSE}
+In the code > processing_code folder:
 
-#summarytable=readRDS("../../results/summarytable.rds")
-#knitr::kable(summarytable, caption = 'Data summary table.')
+1. mpprocessing.R
+2. uownprocessing.Rmd
+3. censusprocessing.Rmd
+4. censusland_code.Rmd
+5. wrfprocessing.Rmd
+6. exploration.Rmd
 
-#I eventually want a nice looking summary statistic table. This is a place holder for now  
-```
+In the code > analysis_code folder:
+
+7. analysis.Rmd
+8. modeling.Rmd
+9. land_model.Rmd
+10. map_images.Rmd
+
+In the products folder
+
+11. Manuscript.Rmd
+12. Supplement.Rmd
+
+
+# Supplementary results
 
 ### Distribution of Microplastic Concentration
 
@@ -65,7 +110,7 @@ knitr::include_graphics("../../results/watershed_overtime.png")
 ```
 
 ### Predictors
-Population, land cover/use, and bacteria levels are hypothesized predictors of microplastic concentration. Figure \@ref(fig:particlesvpop) and Figure \@ref(fig:logmpvcfu) demonstrate the relationship between microplastic concentration and population and microplastic concentration and bacteria levels (CFU/L), respectively. 
+Population, land cover/use, and bacteria levels are hypothesized predictors of microplastic concentration. Figure \@ref(fig:particlesvpop) and Figure \@ref(fig:logmpvcfu) demonstrate the relationship between microplastic concentration and population and microplastic concentration and bacteria levels (CFU/100mL), respectively. 
 
 ```{r particlesvpop,  fig.cap="Particles/L vs Population", echo=FALSE}
 knitr::include_graphics("../../results/particlesvpop.png")
@@ -99,9 +144,9 @@ Figure \@ref(fig:m-logconcvcfu) shows a linear model of microplastic concentrati
 knitr::include_graphics("../../results/m_logconcvcfu.png")
 ```
 
-Figure \@ref(fig:concvturbidity) demonstrates a linear model of particles/L vs turbidity.
+Figure \@ref(fig:m-concvturbidity) demonstrates a linear model of particles/L vs turbidity.
 
-```{r m_concvturbidity,  fig.cap='Concentration vs Turbidity Linear Model', echo=FALSE}
+```{r m-concvturbidity,  fig.cap='Concentration vs Turbidity Linear Model', echo=FALSE}
 knitr::include_graphics("../../results/m_concvturbidity.png")
 ```
 
@@ -112,7 +157,17 @@ lm_fit_table=readRDS("../../results/lm_fit_table.rds")
 knitr::kable(lm_fit_table, caption = 'Linear model fit table.')
 ```
 
+Beyond the basic linear model, we have applied additional methods to improve model performance, including LASSO regularization and building decision trees and random forests for model comparison. The predictions, outcomes, and residuals resulting from each type of plot are demonstrated in Figure \@ref(fig:model-grid)
 
+```{r model-grid, fig.cap='Model Quality', echo=FALSE}
+knitr::include_graphics("../../results/model_grid.png")
+```
 
+Based on the results of the three different models, the LASSO model is the best option for this dataset, though the minimal difference in RMSE when compared to the null model suggests that even though LASSO is the better model method compared to others, it still does not produce a great model for predicting microplastic concentration. 
 
+Figure \@ref(fig:var-importance) demonstrates variable importance in the final selected LASSO model. None of the hypothesized predictors appear as important variables in this model. 
+
+```{r var-importance, fig.cap='Variable importance', echo=FALSE}
+knitr::include_graphics("../../results/var_importance.png")
+```
 

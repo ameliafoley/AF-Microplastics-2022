@@ -113,13 +113,17 @@ Include:
 
 ## LASSO model
 ```{r}
-#based on tidymodels tutorial: case study
+
 #cross validation
 set.seed(123)
 cell_folds <- vfold_cv(train_data)
 
 #model specification
-lasso <- linear_reg(penalty = tune()) %>% set_engine("glmnet") %>% set_mode("regression")
+#lasso <- linear_reg(penalty = tune()) %>% set_engine("glmnet") %>% set_mode("regression")
+lasso <- linear_reg() %>%
+  set_mode("regression") %>%           
+  set_engine("glmnet") %>%
+  set_args(penalty = tune(), mixture = 1)
 
 #set workflow
 lasso_wf <- workflow() %>% add_model(lasso) %>% add_recipe(MP_rec)

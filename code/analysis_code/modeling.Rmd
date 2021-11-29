@@ -16,7 +16,7 @@ library(glmnet)
 library(ranger)
 library(rpart.plot)  # for visualizing a decision tree
 library(vip)         # for variable importance plots
-library(gridExtra)
+library(gridExtra) # for savings images in grids
 
 #path to data
 #note the use of the here() package and not absolute paths
@@ -117,7 +117,11 @@ set.seed(123)
 cell_folds <- vfold_cv(train_data)
 
 #model specification
-lasso <- linear_reg(penalty = tune()) %>% set_engine("glmnet") %>% set_mode("regression")
+#lasso <- linear_reg(penalty = tune()) %>% set_engine("glmnet") %>% set_mode("regression")
+lasso <- linear_reg() %>%
+  set_mode("regression") %>%           
+  set_engine("glmnet") %>%
+  set_args(penalty = tune(), mixture = 1)
 
 #set workflow
 lasso_wf <- workflow() %>% add_model(lasso) %>% add_recipe(MP_rec)
@@ -161,13 +165,13 @@ lasso_resid <- lasso_fit %>%
 
 #model predictions from tuned model vs actual outcomes
 lasso_pred_plot <- ggplot(lasso_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
-  labs(title = "LASSO: Pred vs Outcomes", x = "Particles/L Outcome", y = "Particles/L Prediction")
+  labs(title = "LASSO", x = "Outcome (Particles/L)", y = "Prediction (Particles/L)")+ ylim(0, 1000) + xlim(0,1000)
 lasso_pred_plot
-
+ggsave(lasso_pred_plot, filename = here("results", "lasso_pred.png"))
 
 #plot residuals vs predictions
 lasso_resid_plot <- ggplot(lasso_resid, aes(y = .resid, x = .pred)) + geom_point() + 
-  labs(title = "LASSO: Pred vs Residuals", x = "Particles/L Prediction", y = "Residuals")
+  labs(title = "LASSO", x = "Prediction (Particles/L)", y = "Residuals")
 lasso_resid_plot #view plot
 
 #compare to null model
@@ -270,12 +274,12 @@ tree_resid <- tree_fit %>%
 
 #model predictions from tuned model vs actual outcomes
 tree_pred_plot <- ggplot(tree_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
-  labs(title = "Decision Tree: Pred vs Outcomes", x = "Particles/L Outcome", y = "Particles/L Prediction")
+  labs(title = "Decision Tree", x = "Outcome (Particles/L)", y = "Prediction (Particles/L)")+ ylim(0, 1000) + xlim(0,1000)
 tree_pred_plot
 
 #plot residuals vs predictions
 tree_resid_plot <- ggplot(tree_resid, aes(y = .resid, x = .pred)) + geom_point() + 
-  labs(title = "Decision Tree: Pred vs Residuals", x = "Particles/L Prediction", y = "Residuals")
+  labs(title = "Decision Tree", x = "Prediction (Particles/L)", y = "Residuals")
 tree_resid_plot #view plot
 
 #compare to null model
@@ -283,7 +287,7 @@ metrics_null_train #view null RMSE for train data
 tree_res %>% show_best(n=1) #view RMSE for best decision tree model
 ```
 
-The best decision tree has an RMSE of 102.2, which is better than the null model RMSE of 109. However, the decision tree did not perform as well well as the Lasso regularized model, which had an RMSE of about 100. 
+The best decision tree has an RMSE of 102.2, which is better than the null model RMSE of 109. However, the decision tree did not perform as well well as the Lasso regularized model, which had an RMSE of about 100. Based on the outcome/prediction plot, it appears that the model is making one of two predictions for any given actual outcome. This indicates that this is not a good model, as we don't see the expected 45 degree diagonal line where predictions correlate closely with outcomes. 
 
 # Random forest
 Finally, let's try out a random forest. 
@@ -297,19 +301,19 @@ complete <- complete %>% select(-"visual_score")
 # set seed for reproducible analysis (instead of random subset each time)
 set.seed(123)
 #subset 3/4 of data as training set
-data_split <- initial_split(complete, 
+complete_data_split <- initial_split(complete, 
                             prop = 7/10, 
                             strata = particles_l) #stratify by MP concentration for balanced outcome
 
 #save sets as data frames
-train_data <- training(data_split)
-test_data <- testing(data_split)
+complete_train_data <- training(complete_data_split)
+complete_test_data <- testing(complete_data_split)
 
 #reset recipe with adjusted, complete data
-MP_rec <- recipe(particles_l ~ ., data = train_data) %>% step_dummy(all_nominal())
+MP_rec <- recipe(particles_l ~ ., data = complete_train_data) %>% step_dummy(all_nominal())
 #reset cell_folds
 set.seed(123)
-cell_folds <- vfold_cv(train_data)
+cell_folds <- vfold_cv(complete_train_data)
 ```
 
 ## Random forest
@@ -352,7 +356,7 @@ rf_best
 rf_final_wf <- r_forest_wf %>% finalize_workflow(rf_best)
 
 #fit model with finalized WF
-rf_fit <- rf_final_wf %>% fit(train_data)
+rf_fit <- rf_final_wf %>% fit(complete_train_data)
 ```
 Here, we get an error message that all models failed, note: missing value in visual_score. Let's go back and use only complete cases for the random forest. 
 
@@ -366,19 +370,19 @@ The best random forest models have RMSEs of about 108. This is slightly better t
 autoplot(r_forest_res)
 #calculate residuals
 rf_resid <- rf_fit %>%
-  augment(train_data) %>% #this will add predictions to our df
+  augment(complete_train_data) %>% #this will add predictions to our df
   select(.pred, particles_l) %>%
   mutate(.resid = particles_l - .pred) #manually calculate residuals
 
 #model predictions from tuned model vs actual outcomes
 rf_pred_plot <- ggplot(rf_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
-  labs(title = "Random Forest: Pred vs Outcomes", x = "Particles/L Outcome", y = "Particles/L Prediction")
+  labs(title = "Random Forest", x = "Outcome (Particles/L)", y = "Prediction (Particles/L)")+ ylim(0, 1000) + xlim(0,1000)
 rf_pred_plot
 
 
 #plot residuals vs predictions
 rf_resid_plot <- ggplot(rf_resid, aes(y = .resid, x = .pred)) + geom_point() + 
-  labs(title = "Random Forest: Pred vs Residuals", x = "Particles/L Prediction", y = "Residuals")
+  labs(title = "Random Forest", x = "Prediction (Particles/L)", y = "Residuals")
 rf_resid_plot #view plot
 
 #compare to null model
@@ -387,11 +391,60 @@ r_forest_res %>% show_best(n=1) #view RMSE for best decision tree model
 ```
 
 
-
+# Model comparison plots
 ```{r}
-model_grid <- grid.arrange(lasso_pred_plot, lasso_resid_plot, rf_pred_plot, rf_resid_plot, tree_pred_plot, tree_resid_plot, ncol = 3)
+model_grid <- grid.arrange(lasso_pred_plot, rf_pred_plot, tree_pred_plot, lasso_resid_plot, rf_resid_plot, tree_resid_plot, ncol = 3)
 
 ggsave(model_grid, filename = here("results", "model_grid.png"))
 ```
 
-I'll need to go back and edit this image later so that the titles aren't cut off and the axis scales match up properly so the plots look right. I might also want to add a 45 degree diagonal line to the outcomes vs predictions plot, and some other features to improve appearance. 
+
+# Model selection : LASSO
+```{r}
+#Based on model performance plots and RMSE, we've selected the LASSO model. Let's evaluate it with the test data. 
+
+#fit to test data
+last_lasso_fit <- lasso_final_wf %>% last_fit(data_split)
+last_lasso_fit %>% collect_metrics()
+```
+
+It appears that the lasso model receives an RMSE of ~300 when run with the test data. Compared to the RMSE of 100 with the train data, this is not great performance and indicates that the model overfits the train data. 
+
+# Variable importance
+```{r}
+library(parsnip)
+var_importance <- last_lasso_fit %>% 
+  purrr::pluck(".workflow", 1) %>%   
+  workflows::extract_fit_parsnip() %>% 
+  vip(num_features = 20)
+
+ggsave(var_importance, filename = here("results", "var_importance.png"))
+```
+
+# Final lasso plots
+```{r}
+#diagnostics
+autoplot(lasso_res)
+#calculate residuals
+last_lasso_resid <- last_lasso_fit %>%
+  augment() %>% #this will add predictions to our df
+  select(.pred, particles_l) %>%
+  mutate(.resid = particles_l - .pred) #manually calculate residuals
+
+#model predictions from tuned model vs actual outcomes
+last_lasso_pred_plot <- ggplot(last_lasso_resid, aes(x = particles_l, y = .pred)) + geom_point() + 
+  labs(title = "LASSO: Pred vs Outcomes", x = "Test Outcome (Particles/L)", y = "Test Prediction (Particles/L)")+ ylim(0, 250) + xlim(0,250)
+last_lasso_pred_plot
+ggsave(last_lasso_pred_plot, filename = here("results", "last_lasso_pred.png"))
+
+#plot residuals vs predictions
+last_lasso_resid_plot <- ggplot(last_lasso_resid, aes(y = .resid, x = .pred)) + geom_point() + 
+  labs(title = "LASSO: Test Pred vs Residuals", x = "Test Prediction (Particles/L)", y = "Residuals")
+last_lasso_resid_plot #view plot
+
+#compare to null model
+metrics_null_train #view null RMSE for train data
+last_lasso_fit %>% collect_metrics() #view RMSE for best lasso model
+
+```
+
