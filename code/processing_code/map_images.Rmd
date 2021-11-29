@@ -25,5 +25,10 @@ map_fall
 map_grid <- grid.arrange(rasterGrob(map_fall), rasterGrob(map_winter), rasterGrob(map_spring), rasterGrob(map_summer), ncol = 2)
 
 ggsave(map_grid, filename = here("results", "map_grid.png"))
+
+map_grid1 <- grid.arrange(rasterGrob(map_fall), rasterGrob(map_winter), ncol = 2)
+ggsave(map_grid1, filename = here("results", "map_grid1.png"))
+map_grid2 <- grid.arrange(rasterGrob(map_spring), rasterGrob(map_summer), ncol = 2)
+ggsave(map_grid2, filename = here("results", "map_grid2.png"))
 ```
 

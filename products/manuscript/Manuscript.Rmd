@@ -104,8 +104,8 @@ knitr::include_graphics("../../results/watershed_overtime.png")
 ### Mapping
 Using sample site coordinates and corresponding microplastic concentrations for each seasonal sample date, we generated maps of the study region which demonstrate microplastic concentration at each site. Figure \@ref(fig:map-grid) demonstrates the geographic distribution of sample sites and corresponding microplastic levels. 
 
-```{r map-grid,  fig.cap='Seasonal Maps of Microplastic Concentration', echo=FALSE}
-knitr::include_graphics("../../results/watershed_overtime.png")
+```{r map-grid,  fig.cap='Seasonal Maps of Microplastic Concentration', echo=FALSE, fig.height=3}
+knitr::include_graphics("../../results/map_grid.png")
 ```
 
 ## Bivariate Analysis
