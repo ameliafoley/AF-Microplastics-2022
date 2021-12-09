@@ -389,7 +389,7 @@ library(here) #for data loading/saving</code></pre>
 ## x dplyr::filter()  masks stats::filter()
 ## x dplyr::lag()     masks stats::lag()
 ## x recipes::step()  masks stats::step()
-## • Use tidymodels_prefer() to resolve common conflicts.</code></pre>
+## • Use suppressPackageStartupMessages() to eliminate package startup messages</code></pre>
 <pre class="r"><code>library(rpart)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;rpart&#39;</code></pre>
@@ -578,7 +578,11 @@ set.seed(123)
 cell_folds &lt;- vfold_cv(train_data)
 
 #model specification
-lasso &lt;- linear_reg(penalty = tune()) %&gt;% set_engine(&quot;glmnet&quot;) %&gt;% set_mode(&quot;regression&quot;)
+#lasso &lt;- linear_reg(penalty = tune()) %&gt;% set_engine(&quot;glmnet&quot;) %&gt;% set_mode(&quot;regression&quot;)
+lasso &lt;- linear_reg() %&gt;%
+  set_mode(&quot;regression&quot;) %&gt;%           
+  set_engine(&quot;glmnet&quot;) %&gt;%
+  set_args(penalty = tune(), mixture = 1)
 
 #set workflow
 lasso_wf &lt;- workflow() %&gt;% add_model(lasso) %&gt;% add_recipe(MP_rec)

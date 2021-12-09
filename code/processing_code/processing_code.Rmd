@@ -1,0 +1,567 @@
+---
+title: "processing"
+output: html_document
+---
+# MICROPLASTICS PROCESSING #
+
+```{r}
+###############################
+# processing script
+#
+#this script loads the raw data, processes and cleans it 
+#and saves it as Rds file in the processed_data folder
+
+#load  packages
+library(readxl) #for loading Excel files
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+
+#path to data
+data_location1 <- here::here("data","raw_data","mpdata_ALL.xlsx")
+data_location2 <- here::here("data","raw_data","uown 8.26.xlsx")
+
+#load microplastics data. 
+rawdata1 <- read_excel(data_location1)
+rawdata2 <- read_excel(data_location2)
+
+#take a look at the data
+glimpse(rawdata1)
+glimpse(rawdata2)
+
+#view the dataset on screen
+print(rawdata1)
+print(rawdata2)
+
+#we have 11 variables in the first dataset, and 18 in the second. These variables
+#should correspond so that we can combine the datasets
+
+rawdata <- full_join(rawdata1, rawdata2)
+
+# now, we have a combined dataset to work with
+
+glimpse(rawdata)
+
+# the notes column won't be neccessary for data analysis. Columns 16, 17, and 18 
+# are also unnecessary. Let's remove those. 
+
+processeddata <- rawdata %>% select(-"notes", -(17:19))
+
+# assessing missing values
+is.na(processeddata) %>% summary()
+
+# Since there are just a few observations that are missing location (watershed, lat, and long)
+# and/or count data, and there is not a great way to impute them. Since I am working
+# with data that I collected myself, I know that those observations simply didn't
+# get counted, got lost, or site names were misread/input incorrectly. Let's clean 
+# up the data set. 
+
+processeddata <-subset(processeddata, site!="MIDO 504" & site!="MIDO 503")
+
+# I've removed the rows by name instead of filtering out rows with missing watershed information.
+# This is because I want to retain the "control" rows for now, which originated 
+# in the lab and don't have a corresponding sample location
+
+# Another thing I can do is tidy the data by filling in all "id" information (all missing ids for previous
+# samplings would be me (a)). 
+
+processeddata$id[is.na(processeddata$id)]<-"a"
+
+# Next, let's remove observations where the samples were originally recorded in the
+# data sheet, but apparently never got counted during sample processing. Again, 
+# we just want to remove sample type observations and not control type observations. 
+
+sampledata <- processeddata %>% filter(obs_type == "sample") %>% subset(a_count!="NA" & b_count!="NA")
+controldata <- processeddata %>% filter(obs_type == "control")
+
+# There are a lot of missing values for the c_count and d_count. These 
+# variables resulted from the fourth quarterly sampling in the dataset, when
+# volunteers were enlisted to participate in a microplastics visual identificaiton
+# training session, and volunteers then completed counts. IDs (a, b, c, etc) were 
+# recorded for volunteers. Each biological samples usually includes two technical 
+# replicates - the a_count and b_count. For the volunteer session, each set of 
+# replicates was counted twice (once by two different volunteers) in order to 
+# assess the efficacy of the training program/reproducability of counts. 
+
+# Ideas to address this: 
+# 1. Subset the data into one group of all samples with just a_count
+# and b_count and another group with counts a, b, c, and d for the July sampling
+
+# volunteer contains original particle_l values
+volunteer <- sampledata %>% filter(date == "july_21") #subsetting data with excess counts
+
+# I can look at this subset later to examine differences in counts. For the purposes
+# of the overall data set, I will average the four counts for the july samples
+# in order to calculate the particles per liter value. Since particles_l is already calculated
+# for a_count and b_count, and c_count and d_count, respectively, I'll average that value. 
+
+# julydata contains averaged particle_l values to be added to the sampledata dataset
+julydata <- sampledata %>% filter(date == "july_21") %>% mutate(
+   particles_l = ((particles_l+rep_particles_l)/2), 
+   rep_particles_l = NULL) 
+
+otherdata <- sampledata %>% filter(!date== "july_21") #to rejoin later
+
+#merging mutated data
+cleansampledata <- full_join(otherdata, julydata) %>% select(-"id",
+                                                         -"id2",
+                                                         -"rep_particles_l",
+                                                         -"a_count",
+                                                         -"b_count", 
+                                                         -"c_count",
+                                                         -"d_count",
+                                                         -"volume_ml",
+                                                         -"obs_type")
+
+# save data as RDS
+
+# location to save file
+save_data_location <- here::here("data","processed_data","cleansampledata.rds") 
+save_data_location1 <- here::here("data","processed_data","volunteer.rds") #saving july volunteer data to look at later
+save_data_location2 <- here::here("data","processed_data","controldata.rds")
+
+saveRDS(cleansampledata, file = save_data_location)
+saveRDS(volunteer, file = save_data_location1)
+saveRDS(controldata, file = save_data_location2)
+
+# Here, I'll also load some data we'll want to look at later. The csv file being 
+# imported contains the coordinates for Athens' three water reclamation facilities (WRF)
+# Since WRF efflunet is a hypothesized predictor of microplastic levels, we'll examine
+# this later in the exploratory analysis. 
+
+# load Water Reclamation Facility location data
+
+#path to data
+data_location3 <- here::here("data","raw_data","wrflocation.csv")
+
+#load WRF data
+wrflocation <- read.csv(data_location3)
+
+#save data as RDS
+save_data_location3 <- here::here("data", "processed_data", "wrflocation.rds")
+
+saveRDS(wrflocation, file = save_data_location3)
+
+```
+
+# UOWN PROCESSING #
+This section of code loads the raw UOWN data, processes and cleans it 
+and saves it as Rds file in the processed_data folder. While the microplastics data is the focus of my project, I am interested in comapring UOWN's data on bacteria levels with the recorded microplastic levels at samples sites throughout the study timeframe. 
+
+# load packages
+```{r}
+library(readxl) #for loading Excel files
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+```
+
+# path to data & load data
+```{r}
+data_location1 <- here::here("data","raw_data","UOWN_spring2021.csv")
+
+uowndata <- read.csv(data_location1)
+```
+
+# Take a look at data
+```{r}
+glimpse(uowndata)
+```
+
+# Merging mass UOWN dataset and July data, which was received later (10/27/21)
+```{r}
+july <- read.csv(here("data", "raw_data", "uown_summer2021_qtrly.csv"))
+glimpse(july)
+#The july data also contains 17 columns, just like the mass dataset. This indicates that these datasets should be easy to merge. 
+#adjusting class of some variables so that they are compatible between these two datasets before joining
+july <- july %>% mutate(ID = as.character(ID), 
+               pH = as.numeric(pH)) 
+#adjust class of e.coli.cfu from character to numeric to join datasets (and to work with later in analysis)               
+uowndata <- uowndata %>% mutate(e.coli.cfu = as.numeric(e.coli.cfu))
+
+uowndata <- full_join(uowndata, july, all = TRUE)
+```
+
+
+# Subsetting UOWN data
+```{r}
+uowndata <- uowndata %>% filter((year == 2020 & month == 11) | (year == 2021 & quarter == 1) | (year == 2021 & quarter == 2 )| (year == 2021 & quarter == 3))
+```
+
+Now we have the UOWN data from just the samples dates that we also have the microplastic data for. Right now, only Nov 2020, Feb 2021, and April 2021 data are available from the UOWN website, but July 2021 data should be available soon and I will add it in whenever it is posted. The code chunk above should already include the code to load the July data when the updated file is available. 
+
+# Cleaning up the data
+```{r}
+cleanuowndata <- uowndata %>% select(-"ecoli.method.known", 
+                                     -"biological_score",
+                                     -"po4.mgL", 
+                                     -"conductivity.uscm",
+                                     -"no3.mgL",
+                                     -"pH") %>%
+  rename(site=WSID)
+
+```
+
+# Save UOWN data alone
+```{r}
+# save data as RDS
+
+# location to save file
+save_data_location <- here::here("data","processed_data","cleanuowndata.rds") 
+
+saveRDS(cleanuowndata, file = save_data_location)
+```
+
+# Combine UOWN data with microplastic sample data
+```{r}
+# load MP data
+data_location <- here::here("data","processed_data","cleansampledata.rds")
+cleansampledata <- readRDS(data_location)
+
+# edit site column to match UOWN data
+# remove white space in site name 
+cleansampledata <- cleansampledata %>% mutate(site = 
+                                     gsub(" ","",cleansampledata$site))
+
+# join data sets by site name (cleansampledata) / WSID (cleanuowndata)
+joindata <- left_join(cleansampledata, cleanuowndata, by = "site")
+
+# we joined the data by site, but we also need to join it by date. we'll have to clean up some of the columns in order to do that
+
+# edit date format by creating new columns for month and year
+cleansampledata <- cleansampledata %>% mutate(year = ifelse(date == "nov_20", "2020", "2021")) %>% mutate(month = ifelse(date == "nov_20", "11", 
+                                                                                                              ifelse(date == "feb_21", "2", 
+                                                                                                                     ifelse(date == "apr_21", "4", 
+                                                                                                                            ifelse(date == "july_21", "7", "no")))))
+cleansampledata$month <- as.numeric(cleansampledata$month)
+cleansampledata$year <- as.numeric(cleansampledata$year)
+# try joining again
+joindata <- left_join(cleansampledata, cleanuowndata, by = c("site", "month", "year"))
+
+# clean up joined dataset
+joindata <- joindata %>% select(-"day",
+                                -"WS", 
+                                -"ID")
+# save combined data as RDS
+save_data_location <- here::here("data", "processed_data", "combodata.rds")
+
+saveRDS(joindata, file = save_data_location)
+
+```
+
+# CENSUS PROCESSING #
+
+At this point, I have written a few processing files loading the microplastics data, land cover/use data, and UOWN data for this project. I'd also like to look at small area population. I think I can achieve this by looking at population by zip code in Athens Clarke County, which is available from the US Census. My goal is to convert the latitude and longitude coordinates for each sample site into a zip code, and then examine whether microplastic levels vary based on local population size/population density. 
+
+The data will come from the American Community Survey 5-year estimate 2019, and I will plan to use API. To convert sample coordinates to comparable zip codes, I can use the `tidygeocoder` package. 
+
+Citation for zipcode population data (saving for later): 
+United States Census Bureau. B01001 SEX BY AGE, 2019 American Community Survey 5-Year Estimates. U.S. Census Bureau, American Community Survey Office. Web. 10 December 2020. http://www.census.gov/.
+
+Downloaded at: https://www.georgia-demographics.com/zip_codes_by_population
+
+```{r}
+#load  packages
+library(readxl) #for loading Excel files
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+library(revgeo) #for reverse geocoding coordinates to zipcode
+
+
+#load data. 
+combodata <- readRDS(here("data", "processed_data", "combodata.rds"))
+```
+
+
+
+# renaming variable to differentiate use in processing
+```{r}
+popdata <- combodata
+#save data as RDS
+saveRDS(popdata, file = here("data", "processed_data", "popdata.rds"))
+
+```
+
+Update 10/25/21
+
+I am realizing that we can get more localized population levels by using census tracts, which are smaller levels of census geography. Let's try to use FIPS codes (which include tract info) to obtain population data that might be more informative. I've removed the previous code that converted coordinates to zip code and got population based on zip code. This code is now located in `ARCHIVE.Rmd`
+
+# Loading data with FIPS variable, converted from coordinates
+
+FIPS codes were obtained through a census API run on the local computer, then saved locally and copied into the project directory under `raw_data` for this analysis. This ensures that the code will be reproducible and consistent even if the API changes in the future. 
+```{r}
+fips <- readRDS(here("data", "raw_data", "fips_copy.RDS"))
+#saveRDS(fips, here("data", "processed_data", "fips.RDS"))
+```
+
+Here, after attemping to use `get_decennial()` we receive an error message suggesting to use NHGIS data since the most recent small census geography data is not available through `get_decennial()`.
+
+# Using NHGIS data for more recent block-level population counts
+```{r}
+#Downloaded data from http://NHGIS.org and placed in "raw_data" for this R project. 
+library(ipumsr)
+
+#read in census tract level population data
+tract <- read.csv(here("data","raw_data","nhgis0001_csv", "nhgis0001_ds244_20195_tract.csv"))
+
+#clean up dataset to remove unneeded columns/variables
+tract <- tract %>% filter(STATE == "Georgia") %>% select(1:3, 6:9, 12, 40, 43:46)
+
+#Now, we have the FIPS codes for each sample site (down to the tract/block level), and we have population counts by FIPS code. 
+
+#First, we need to remove the last four digits of the FIPS code in the fips dataset so that it will correspond with the #FIPS code in the tract dataset. We'll also need to remove the G from the beginning of the tract FIPS codes. 
+
+
+#combine individual codes for state, county, tract to get long form FIPS code
+a <- tract %>% mutate(FIPS = paste(STATEA, COUNTYA, sep = "")) %>%
+  mutate(FIPS = paste(FIPS, TRACTA, sep = "0"))
+
+#keep only the variables we need, FIPS code and population size (ALUBE001)
+a <- a %>% select("FIPS", "ALUBE001")
+#remove last four digits from fips codes associates with samples, so that they coordinate with population census tract FIPS codes
+b <- fips %>% mutate(FIPS = (substr(FIPS,1,nchar(FIPS)-4)))
+#combine datasets by FIPS code, so that population size is added to our main dataset based on corresponding FIPS code
+blockpop <- left_join(b, a, by = "FIPS")
+
+#We still have some missing values, but when I search for the FIPS code that are missing population levels, I am able to find them in the tract dataset. It looks like the FIPS code/GEOID are sometimes the same but sometimes differ by one digit (usually a zero inserted in the middle of the string somewhere). Let's adjust the GEOID variable to make it comparable to the FIPS codes we are still missing population data for, and then we'll join the datasets again to try to fill in missing values. 
+
+#let's try GEOID minus first 7 digits
+tract$GEOID <- gsub("^.{0,7}", "", tract$GEOID) 
+#selecting only the variables we want to add in our final combination dataset
+tractpop <- tract %>% select("GEOID", "ALUBE001")
+#joining based on FIPS code to fill in missing population data
+c <- left_join(blockpop, tractpop, by = c("FIPS" = "GEOID"))
+
+#This last attempt was successful and we now have a column that gives us the census tract level population count, with no missing values. We no longer need the first column, or the zip code and zip code population data that we looked at initially. Let's clean up this dataset for further exploration
+
+#Remove first ALUBE001 column and zip, population columns
+tractpopdata <- c %>% select(-"ALUBE001.x")
+tractpopdata <- rename(tractpopdata, "population" = "ALUBE001.y")
+
+
+#save as RDS
+saveRDS(tractpopdata, file = here("data", "processed_data", "tractpopdata.rds"))
+
+```
+
+# LAND PROCESSING #
+This portion of code will load the land cover data and associate it with each sample site. 
+
+##Load Dependencies
+The following code loads the package dependencies for our analysis:
+```{r}
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+#install.packages("tidycensus", repos = "http://cran.us.r-project.org")
+#install.packages("censusapi", repos = "http://cran.us.r-project.org")
+#install.packages("censusGeography", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/chron_2.3-55.tgz")
+#install.packages("rerddap", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/rerddap_0.6.5.tgz")
+
+library(tidyverse)
+library(dplyr) #data wrangling
+library(tidycensus) #access census data
+library(censusapi)
+library(rerddap)
+library(RCurl)
+
+```
+
+##Load Census API (load only once)
+```{r}
+#tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE) 
+```
+^This is not a code chunk you will need in every notebook. As long as "install = TRUE", you will only have to do this once. 
+#restart R session after installing the first time
+
+##Obtain FIPS codes for sampling sites
+```{r}
+#create function
+latlong2fips <- function(latitude, longitude) {
+  url <- "https://geo.fcc.gov/api/census/block/find?format=json&latitude=%f&longitude=%f"
+  url <- sprintf(url, latitude, longitude)
+  json <- RCurl::getURL(url)
+  json <- RJSONIO::fromJSON(json)
+  as.character(json$County['FIPS'])
+}
+#vectorize so function will take more than one argument
+latlong2fips_vec <- Vectorize(latlong2fips, vectorize.args = "latitude", "longitude")
+```
+
+#accessing NHGIS land use/land cover data from downloaded file
+source:https://www.nhgis.org/user-resources/environmental-summaries#download
+```{r}
+#path to data
+data_location1 <- here::here("data","raw_data","landcover2015.csv")
+
+#load data. 
+landcover <- read.csv(data_location1)
+
+class(landcover$GISJOIN)
+#class = character, so I can use strsplit(). Data source uses extra letters and zeroes in their GIS code. I need to extract the original FIPS code to match my data
+
+#extract state fip from GISJOIN
+landcover = landcover %>% mutate(state_fip = substring(landcover$GISJOIN, 2,3)) %>% relocate(state_fip)
+
+#extract county fip from GISJOIN
+landcover = landcover %>% mutate(county_fip = substring(landcover$GISJOIN, 5, 7)) %>% relocate(county_fip)
+
+#combine to state, county fip for whole fips codes
+landcover$fips = paste0(landcover$state_fip, landcover$county_fip)
+
+landcover <- landcover %>%
+  select(fips, everything()) # moving fips column to far left of data set
+
+#clean dataset by selecting only data for the state of Georgia
+landcover <- landcover %>%
+  filter(state_fip == "13")
+
+#get rid of the 4th and the 8th zero in GISJOIN to make compatible with FIPS codes for samples + population count
+landcover = landcover %>% mutate(FIPS = paste(state_fip, county_fip, substring(landcover$GISJOIN, 9, 14), sep = "")) %>% relocate(FIPS)
+
+#filter to clean data set
+landcoverclean = landcover %>% select(-GISJOIN, -state_fip, -county_fip, -OID, fips)
+#remove empty variables and rename variables according to key described in readme file for raw NHGIS landcover data
+landcoverclean <- landcoverclean %>% select(-(4:67)) #remove variable columns from years 2001 and 2006, keeping only 2011 data 
+landcoverclean <- landcoverclean %>% rename(open_water = AREA11_2011,
+                                            perennial_ice = AREA12_2011, 
+                                            developed_open = AREA21_2011, 
+                                            developed_low = AREA22_2011, 
+                                            developed_medium = AREA23_2011, 
+                                            developed_high = AREA24_2011, 
+                                            barren_land = AREA31_2011, 
+                                            deciduous_forest = AREA41_2011, 
+                                            evergreen_forest = AREA42_2011, 
+                                            mixed_forest = AREA43_2011,
+                                            shrub = AREA52_2011, 
+                                            grassland = AREA71_2011, 
+                                            pasture = AREA81_2011, 
+                                            crops = AREA82_2011, 
+                                            woody_wetlands = AREA90_2011, 
+                                            herb_wetlands = AREA95_2011) 
+landcoverclean <- landcoverclean %>% select(-(20:35), 
+                                            -"perennial_ice") #removing empty perennial ice column, removing proporation variables (keeping area values rather than proportions. we have the total area and can recalculate proportion later if needed)
+                                          
+#Based on the NAs in the perennial_ice columns and knowing the context/region of the data, I am thinking that the other NA values for certain land cover types simply indicate that there is no land cover of that type in the area - therefore, these values are essentially zero. Let's replace NA values with zeroes so that we are working with complete (not missing) data. 
+
+landcoverclean[is.na(landcoverclean)] <- 0 #replace NA with 0
+                                            
+                                      
+#Now we have landcover data in a form that is compatible with our sample site data (using small geography census info). Let's join datasets to create a dataset with sample site info and land cover info
+tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
+athensland <- left_join(tractpopdata, landcoverclean, by = "FIPS")
+
+#cleanup resultant dataset
+athensland <- athensland %>% select(-"fips", 
+                              -"FIPS", 
+                              -"AREA", 
+                              -"quarter", 
+                              -"month",
+                              -"year")
+
+#save as RDS
+saveRDS(athensland, file = here("data", "processed_data", "athensland.rds"))
+```
+
+# WRF PROCESSING #
+This portion of code will use water reclamation facility location data to calculate the distance between each sample site and the nearest wastewater treatment plant. 
+
+I also wanted to look at proximity of sample sites to water reclamation facilities (WRFs). Let's try that. 
+# load WRF location
+```{r}
+library(here)
+library(geodist) #to calculate distance from sample site to each water reclamation facility
+library(dplyr) #for data processing
+library(tidyverse)
+
+#load MP data
+mpdata <- readRDS(here("data", "processed_data", "popdata.rds"))
+#path to data
+wrfdata_location <- here::here("data","processed_data","wrflocation.rds")
+
+#load data
+wrflocation <- readRDS(wrfdata_location)
+```
+
+Eventually, I would like to be able to view this information on a map - where WRFs are labelled, and samples sites are color-coded by density of microplastics found. For now, let's see if we can calculate distance otherwise. 
+
+```{r}
+#calculate distance between sample coordinates and WRF location
+wrfdistance <- geodist_vec(mpdata$long, mpdata$lat, wrflocation$long, wrflocation$lat)
+```
+
+I think the product we have here is a matrix of the distance of each sample site from each of the three WRFs, in the order that they appear in the WRF data (Cedar Creek, North Oconee, Middle Oconee). But, the labelling of the data is not super clear, so I need to verify this to be sure. 
+
+
+```{r}
+test <- mpdata %>% mutate(wrfdist = geodist_vec(mpdata$long, mpdata$lat, wrflocation$long, wrflocation$lat))
+```
+
+This produced another column like I wanted, but I don't know which WRF the distance was calculated for. Maybe I need to save WRF locations as individual lat and long values, and produce three new columns that way? However, I am not sure what the final product would look like if we do that, because a sample site could be closely associated with one WRF but much further from another one. Maybe I need to narrow this down to proximity to the nearest WRF, so that each sample site is only associated with the distance to ONE WRF, not three. 
+
+#Working on gathering WRF distance
+```{r}
+#set individual WRF locations and save as values
+cedarcreeklat = 33.87351 
+cedarcreeklong = -83.33639
+northoconeelat = 33.93402
+northoconeelong = -83.36018
+middleoconeelat = 33.90862
+middleoconeelong = -83.39214
+
+mpdata <- mpdata %>% mutate(ccwrf = geodist_vec(mpdata$long, mpdata$lat, cedarcreeklong, cedarcreeklat))
+mpdata <- mpdata %>% mutate(nowrf = geodist_vec(mpdata$long, mpdata$lat, northoconeelong, northoconeelat))
+mpdata <- mpdata %>% mutate(miwrf = geodist_vec(mpdata$long, mpdata$lat, middleoconeelong, middleoconeelat))
+
+#Since I only care about the proximity to the closest WRF, my next task is to write code that creates a new variable returning only the lowest value out of ccwrf, nowrf, and miwrf for each sample site. 
+
+#subset data into just distance from each WRF
+wrf <- mpdata %>% select("ccwrf", "nowrf", "miwrf", "site", "date") 
+#find minimum distance to any WRF out of all three
+val <- do.call(pmin, c(wrf, na.rm = TRUE)) 
+minwrf <- transform(wrf, min=val, minCol = names(wrf)[max.col(wrf == val, 'first')])
+
+#minwrf contains the variable min, which tells us the distance from the sample site to the nearest WRF. This is all of the information that we need, so now we will re-join to the original DF
+mpwrfdata <- left_join(mpdata, minwrf)
+
+#remove variables we won't need anymore
+mpwrfdata <- mpwrfdata %>% select(-"ccwrf", 
+                                  -"nowrf",
+                                  -"miwrf")
+#rename columns
+mpwrfdata <- mpwrfdata %>% rename("dist" = "min", 
+                     "wrf" = "minCol")
+
+#save as RDS
+saveRDS(mpwrfdata, file = here("data", "processed_data", "mpwrfdata.rds"))
+```
+
+Update 10/25/21
+I've updated the population data by accessing census tract level population rather than zip code level population. This should give us more localized population levels and might paint a better picture of the relationship between MP particles per liter and local population level. 
+
+#Adding WRF data to updated population data
+```{r}
+#load data
+tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
+
+#add wrf data to tractpopdata
+wrfjoin <- mpwrfdata %>% select("site", "date", "wrf", "dist") #selecting just the variables we want to add
+mpwrfcombo <- left_join(tractpopdata, wrfjoin, by = c("site", "date")) #joining the two datasets
+
+glimpse(mpwrfcombo)
+#dist variable is saved as character when it needs to be numeric
+#convert dist from character to numeric
+mpwrfcombo <- mpwrfcombo %>% mutate(dist = as.numeric(dist))
+
+#ungroup df
+mpwrfcombo <- ungroup(mpwrfcombo)
+
+#save as RDS
+saveRDS(mpwrfcombo, file = here("data", "processed_data", "mpwrfcombo.rds"))
+```
+
+Now, `mpwrfcombo` contains the sample info and the new WRF distance info. However, something to work on going forward is that a sample site may be near a WRf but not downstream of it. It might be more important to know the distance to the nearest upstream WRF. I'll have to go back and consider this as I continue my exploration/analysis. 
+
+Other than not including landcover data, `mpwrfcombo` is the most comprehensive dataset, including almost all of the data that I have compiled so far.  
+

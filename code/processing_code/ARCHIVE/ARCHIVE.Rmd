@@ -1,0 +1,29 @@
+---
+title: "ARCHIVE"
+output: html_document
+---
+
+This folder and this Markdown contain extra code and Markdown files that are no longer needed in the project or that have been converted/condensed to a separate file. The files in this folder are saved for reference but *do not* need to be used to reproduce this project. 
+
+# convert lat long to zip
+```{r}
+#path to data
+data_location <- here::here("data","raw_data","zippop.xlsx")
+
+#load population data. 
+zippop <- read_excel(data_location)
+
+# use Bing API to convert coordinates to corresponding zip code
+zip<-revgeo(longitude=combodata$long, 
+                            latitude=combodata$lat, 
+                            provider = 'bing', API = 'AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ', output="frame", item = "zip")
+
+# add zip variable to combodata
+combodata <- combodata %>% mutate(revgeo(longitude=combodata$long, 
+                            latitude=combodata$lat, 
+                            provider = 'bing', API = 'AoRXmf4yiTmdhPeNAXK2kjZBU1cSCI-_8fWgIzPu45Rh6PMu_TP1Rx_ZTuNEdvQJ', output="frame", item = "zip") %>%
+                              select("zip"))
+
+#add zipcode information to my original combined dataset
+popdata <- left_join(combodata, zippop, by = c("zip" = "zipcode"))
+```

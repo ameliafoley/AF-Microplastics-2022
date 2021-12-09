@@ -1,5 +1,18 @@
 # Overview
-Welcome to my MADA project! Below, I will outline my project submissions by part throughtout the semester. Please see the bottom section for instructions on reproducing my project. 
+Welcome to my MADA project! Please see the next section for instructions on reproducing this analysis. Below, I will outline my project submissions by part throughout the semester. 
+
+# Reproducing this project
+All required data files are located within this R.project file on GitHub. Run scripts in this order:
+1. processing_code.Rmd
+2. exploration.Rmd
+3. analysis.Rmd
+4. modeling.Rmd
+5. land_model.Rmd
+6. map_images.Rmd
+7. Manuscript.Rmd
+8. Supplement.Rmd
+
+A more detailed description of the steps for reproduction can also be found in the `Supplement.Rmd` file. 
 
 # Project Part 1: Proposal
 My proposal for part 1 of the project can be found in the products folder (`proposal.Rmd` and `proposal.html`)
@@ -37,21 +50,5 @@ Areas I know that I still need to work on are:
 # Project Part 5: Full Project for Peer Review
 Previous analyses have been intepreted and added to the Results section. Extra figures have been relocated from the Manuscript to the Supplement. The Results and Discussion sections have been added to and polished. Some previous errors in code have been edited/addressed. 
 
-# Reproducing this project
-All required data files are located within this R.project file on GitHub. Run scripts in this order:
-1. mpprocessing.R
-2. uownprocessing.Rmd
-3. censusprocessing.Rmd
-4. censusland_code.Rmd
-5. wrfprocessing.Rmd
-6. exploration.Rmd
-7. analysis.Rmd
-8. modeling.Rmd
-9. land_model.Rmd
-10. map_images.Rmd
-11. Manuscript.Rmd
-12. Supplement.Rmd
-
-A more detailed description of the steps for reproduction can also be found in the `Supplement.Rmd` file. 
-
-
+# Peer Review Response + Final Edits
+Condensed processing scripts to make the project more easily reproducible. Moved instructions for reproducing to the top of the README landing page instead of the bottom. 

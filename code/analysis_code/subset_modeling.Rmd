@@ -3,7 +3,7 @@ title: "subset_modeling"
 output: html_document
 ---
 
-In this portion of the analysis, we will perform modeling on a smaller subset of data in attempt to improve model performance. The original aim of this document was to perform feature selection/subsetting for model improvement. However, the implementation of the LASSO method eliminated the need for this by essentially automating subset selection. The contents of this document are needed for the final analysis/manuscript product, but are kept in the project repository for understanding of the whole analysis process. 
+In this portion of the analysis, we will perform modeling on a smaller subset of data in attempt to improve model performance. The original aim of this document was to perform feature selection/subsetting for model improvement. However, the implementation of the LASSO method eliminated the need for this by essentially automating subset selection. The contents of this document are *not* needed for the final analysis/manuscript product, but are kept in the project repository for understanding of the whole analysis process. 
 
 # load packages and data
 ```{r}
@@ -101,6 +101,7 @@ metrics_null_test <- collect_metrics(null_fit_test) #gets fit metrics
 
 # Model tuning and fitting
 Include:
+
 1. Model specification
 2. Workflow definition
 3. Tuning grid specification
@@ -176,7 +177,7 @@ lasso_res %>% show_best(n=1) #view RMSE for best lasso model
 
 ```
 
-next I want to see what predictors are used in the best lasso model. also need to compare to null model
+Next, I want to see what predictors are used in the best lasso model. also need to compare to null model
 
 RMSE for best LASSO model on the subset data is 113.09, compared to 109.4 RMSE for the null model. This is definitely not a well-performing model, since we want a better RMSE for any model we build than the RMSE for the null model. 
 
@@ -207,12 +208,12 @@ Try modeling with data subset, including these variables: "particles_l", "visual
 
 
 The results we get from the initial machine learning modeling and from the modeling of this subset data are not great. Let's think of some ways that we can go about improving our model. 
+
 - An option is variable/predictor removal. We tried that with the subset data. We could attempt further subsets going forward. 
 - Variable transformation. Some microplastic studies use log transformation on the concentration values to get a normal distribution. 
-- Alternatives: account for different distribution. The distribution of microplastic concentration may be considered more Poisson distributed than normally distributed. First, we can test to see whether it falls in either of these distribution categories, and based on the results we can apply a GLM with Poisson distribution. (Tranformation could make intrepretability more difficult - may want to avoid)
-- however, regularization may accomplish our goals more efficiently - we are advised that subset selection is not always a great idea and doesn't neccesarily do the best job of addressing overfitting
-- could try ridge regression for alternate form of regularization 
-- could try decision tree (though we learned these usually don't perform as well as LASSO)
+- However, regularization may accomplish our goals more efficiently - we are advised that subset selection is not always a great idea and doesn't neccesarily do the best job of addressing overfitting
+- Could try ridge regression for alternate form of regularization 
+- Could try decision tree (though we learned these usually don't perform as well as LASSO)
 
 # Model selection : LASSO
 ```{r}

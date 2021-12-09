@@ -12,6 +12,7 @@ For this project, I began with microplastic count data for various sample sites,
 In this document, I will explore relationships between some of these variables. 
 
 Quantities of main interest: 
+
  - particles per liter of microplastics
  - season/sample date
  - population level
@@ -297,4 +298,4 @@ ggsave(filename = figure_file, plot=p12)
 
 Looking at the data this way, we do see somewhat of a pattern. It appears that the range of microplastic concentration decreases from Fall 2020 to Summer 2021. This may be due to some particularly large outliers in the earlier sample dates. Also, we may consider human error. Since I counted these microplastics myself, it may be that I initially over-counted, including false positives (particles that I mistook for microplastics, when they may have been organic matter, etc). Essentially, methods may have improved/refined over time. 
 
-Nice! Going forward, I should think about whether to keep or remove the watersheds that were only sampled in the last (July) sampling. I also see that some watershed are missing intermediate data points and are not connected. Would we want to connect and skip over a season, or leave them unconnected (looking at Oconee River)
+Going forward, I should think about whether to keep or remove the watersheds that were only sampled in the last (July) sampling. Note: I also see that some watershed are missing intermediate data points and are not connected. Would we want to connect and skip over a season, or leave them unconnected (looking at Oconee River)?

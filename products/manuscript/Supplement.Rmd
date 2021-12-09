@@ -30,12 +30,13 @@ Code and data files required to reproduce this analysis are available on [GitHub
     + modeling.Rmd is the main analysis file containing final models (LASSO)
     + subset_modeling.Rmd is an additional analysis file performing models on subsets of data; it is not used for the manuscript
   + "**processing_code**"
-    + censusland_code.Rmd combines land cover data with microplastic data
-    + censusprocessing.Rmd imports census tract population data
+    + processing_code.Rmd is the master script for all processing. It combines all of the scripts from below, which have been moved to the `ARCHIVE` folder. 
+      + censusland_code.Rmd combines land cover data with microplastic data
+      + censusprocessing.Rmd imports census tract population data
+      + mpprocessing.R processes the original microplastic data file and saves cleaned data
+      + uownprocessing.Rmd imports additional water quality data from UOWN.org
+      + wrfprocessing.Rmd imports distance for nearest water reclamation facility
     + map_images.Rmd combines individual map images to produce a grid
-    + mpprocessing.R processes the original microplastic data file and saves cleaned data
-    + uownprocessing.Rmd imports additional water quality data from UOWN.org
-    + wrfprocessing.Rmd imports distance for nearest water reclamation facility
   + "**readme.md**" provides an order and brief description of dependencies/outputs for processing code files
 * "**data**" folder contains all raw and processed data
 * "**products**" folder contains files to produce the Manuscript and Supplement
@@ -55,24 +56,22 @@ Reproducing this project requires R, RStudio, and Microsoft Word. Files should b
 
 In the code > processing_code folder:
 
-1. mpprocessing.R
-2. uownprocessing.Rmd
-3. censusprocessing.Rmd
-4. censusland_code.Rmd
-5. wrfprocessing.Rmd
-6. exploration.Rmd
+1. processing_code.Rmd
 
 In the code > analysis_code folder:
 
-7. analysis.Rmd
-8. modeling.Rmd
-9. land_model.Rmd
-10. map_images.Rmd
+2. analysis.Rmd
+3. modeling.Rmd
+4. land_model.Rmd
+
+In the code > processing_code folder:
+
+5. map_images.Rmd
 
 In the products folder
 
-11. Manuscript.Rmd
-12. Supplement.Rmd
+6. Manuscript.Rmd
+7. Supplement.Rmd
 
 
 # Supplementary results

@@ -372,7 +372,14 @@ pre code {
 <li>location population levels by zip code, converted from lat/long and joined with census data.</li>
 </ul>
 <p>In this document, I will explore relationships between some of these variables.</p>
-<p>Quantities of main interest: - particles per liter of microplastics - season/sample date - population level - proximity to water reclamation facility effluent - bacteria levels at corresponding samples sites/dates</p>
+<p>Quantities of main interest:</p>
+<ul>
+<li>particles per liter of microplastics</li>
+<li>season/sample date</li>
+<li>population level</li>
+<li>proximity to water reclamation facility effluent</li>
+<li>bacteria levels at corresponding samples sites/dates</li>
+</ul>
 <div id="load-packages-and-data" class="section level1">
 <h1>load packages and data</h1>
 <pre class="r"><code>library(dplyr) #for data processing</code></pre>
@@ -406,7 +413,10 @@ library(GGally) #for producing correlation matrices</code></pre>
 <pre><code>## The following object is masked from &#39;package:dplyr&#39;:
 ## 
 ##     combine</code></pre>
-<pre class="r"><code>#path to data
+<pre class="r"><code>library(gtsummary)
+
+
+#path to data
 data_location &lt;- here::here(&quot;data&quot;,&quot;processed_data&quot;,&quot;mpwrfcombo.rds&quot;)
 
 #load data
@@ -747,7 +757,7 @@ ggsave(filename = figure_file, plot=p12)</code></pre>
 
 ## Warning: Removed 1 row(s) containing missing values (geom_path).</code></pre>
 <p>Looking at the data this way, we do see somewhat of a pattern. It appears that the range of microplastic concentration decreases from Fall 2020 to Summer 2021. This may be due to some particularly large outliers in the earlier sample dates. Also, we may consider human error. Since I counted these microplastics myself, it may be that I initially over-counted, including false positives (particles that I mistook for microplastics, when they may have been organic matter, etc). Essentially, methods may have improved/refined over time.</p>
-<p>Nice! Going forward, I should think about whether to keep or remove the watersheds that were only sampled in the last (July) sampling. I also see that some watershed are missing intermediate data points and are not connected. Would we want to connect and skip over a season, or leave them unconnected (looking at Oconee River)</p>
+<p>Going forward, I should think about whether to keep or remove the watersheds that were only sampled in the last (July) sampling. Note: I also see that some watershed are missing intermediate data points and are not connected. Would we want to connect and skip over a season, or leave them unconnected (looking at Oconee River)?</p>
 </div>
 
 

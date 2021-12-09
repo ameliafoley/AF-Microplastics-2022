@@ -1,0 +1,121 @@
+---
+title: "census-land-data"
+output: html_document
+---
+
+##Load Dependencies
+The following code loads the package dependencies for our analysis:
+```{r}
+library(dplyr) #for data processing
+library(here) #to set paths
+library(tidyverse)
+#install.packages("tidycensus", repos = "http://cran.us.r-project.org")
+#install.packages("censusapi", repos = "http://cran.us.r-project.org")
+#install.packages("censusGeography", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/chron_2.3-55.tgz")
+#install.packages("rerddap", repos = "https://cran.rstudio.com/bin/macosx/contrib/4.0/rerddap_0.6.5.tgz")
+
+library(tidyverse)
+library(dplyr) #data wrangling
+library(tidycensus) #access census data
+library(censusapi)
+library(rerddap)
+library(RCurl)
+
+```
+
+##Load Census API (load only once)
+```{r}
+#tidycensus::census_api_key("c02ef0638e60f9d5fbb45de5219821e3a25cd7d2", install = TRUE) 
+```
+^This is not a code chunk you will need in every notebook. As long as "install = TRUE", you will only have to do this once. 
+#restart R session after installing the first time
+
+##Obtain FIPS codes for sampling sites
+```{r}
+#create function
+latlong2fips <- function(latitude, longitude) {
+  url <- "https://geo.fcc.gov/api/census/block/find?format=json&latitude=%f&longitude=%f"
+  url <- sprintf(url, latitude, longitude)
+  json <- RCurl::getURL(url)
+  json <- RJSONIO::fromJSON(json)
+  as.character(json$County['FIPS'])
+}
+#vectorize so function will take more than one argument
+latlong2fips_vec <- Vectorize(latlong2fips, vectorize.args = "latitude", "longitude")
+```
+
+#accessing NHGIS land use/land cover data from downloaded file
+source:https://www.nhgis.org/user-resources/environmental-summaries#download
+```{r}
+#path to data
+data_location1 <- here::here("data","raw_data","landcover2015.csv")
+
+#load data. 
+landcover <- read.csv(data_location1)
+
+class(landcover$GISJOIN)
+#class = character, so I can use strsplit(). Data source uses extra letters and zeroes in their GIS code. I need to extract the original FIPS code to match my data
+
+#extract state fip from GISJOIN
+landcover = landcover %>% mutate(state_fip = substring(landcover$GISJOIN, 2,3)) %>% relocate(state_fip)
+
+#extract county fip from GISJOIN
+landcover = landcover %>% mutate(county_fip = substring(landcover$GISJOIN, 5, 7)) %>% relocate(county_fip)
+
+#combine to state, county fip for whole fips codes
+landcover$fips = paste0(landcover$state_fip, landcover$county_fip)
+
+landcover <- landcover %>%
+  select(fips, everything()) # moving fips column to far left of data set
+
+#clean dataset by selecting only data for the state of Georgia
+landcover <- landcover %>%
+  filter(state_fip == "13")
+
+#get rid of the 4th and the 8th zero in GISJOIN to make compatible with FIPS codes for samples + population count
+landcover = landcover %>% mutate(FIPS = paste(state_fip, county_fip, substring(landcover$GISJOIN, 9, 14), sep = "")) %>% relocate(FIPS)
+
+#filter to clean data set
+landcoverclean = landcover %>% select(-GISJOIN, -state_fip, -county_fip, -OID, fips)
+#remove empty variables and rename variables according to key described in readme file for raw NHGIS landcover data
+landcoverclean <- landcoverclean %>% select(-(4:67)) #remove variable columns from years 2001 and 2006, keeping only 2011 data 
+landcoverclean <- landcoverclean %>% rename(open_water = AREA11_2011,
+                                            perennial_ice = AREA12_2011, 
+                                            developed_open = AREA21_2011, 
+                                            developed_low = AREA22_2011, 
+                                            developed_medium = AREA23_2011, 
+                                            developed_high = AREA24_2011, 
+                                            barren_land = AREA31_2011, 
+                                            deciduous_forest = AREA41_2011, 
+                                            evergreen_forest = AREA42_2011, 
+                                            mixed_forest = AREA43_2011,
+                                            shrub = AREA52_2011, 
+                                            grassland = AREA71_2011, 
+                                            pasture = AREA81_2011, 
+                                            crops = AREA82_2011, 
+                                            woody_wetlands = AREA90_2011, 
+                                            herb_wetlands = AREA95_2011) 
+landcoverclean <- landcoverclean %>% select(-(20:35), 
+                                            -"perennial_ice") #removing empty perennial ice column, removing proporation variables (keeping area values rather than proportions. we have the total area and can recalculate proportion later if needed)
+                                          
+#Based on the NAs in the perennial_ice columns and knowing the context/region of the data, I am thinking that the other NA values for certain land cover types simply indicate that there is no land cover of that type in the area - therefore, these values are essentially zero. Let's replace NA values with zeroes so that we are working with complete (not missing) data. 
+
+landcoverclean[is.na(landcoverclean)] <- 0 #replace NA with 0
+                                            
+                                      
+#Now we have landcover data in a form that is compatible with our sample site data (using small geography census info). Let's join datasets to create a dataset with sample site info and land cover info
+tractpopdata <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
+athensland <- left_join(tractpopdata, landcoverclean, by = "FIPS")
+
+#cleanup resultant dataset
+athensland <- athensland %>% select(-"fips", 
+                              -"FIPS", 
+                              -"AREA", 
+                              -"quarter", 
+                              -"month",
+                              -"year")
+
+#save as RDS
+saveRDS(athensland, file = here("data", "processed_data", "athensland.rds"))
+```
+
