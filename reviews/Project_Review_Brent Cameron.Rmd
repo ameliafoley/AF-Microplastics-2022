@@ -1,0 +1,209 @@
+---
+title: Project Review Template 
+date: "`r file.mtime(knitr::current_input())`"
+#bibliography: ../media/references.bib
+output: 
+  html_document:
+    toc_depth: 3
+    number_sections: true
+---
+
+# Overview
+
+Title of project: Plastic in the Urban Freshwater Environment
+
+Name of project author(s): Amelia Foley
+
+Name of project reviewer: Brent Cameron
+
+# Specific project content evaluation
+Evaluate the different parts of the project by filling in the sections below.
+
+
+## Background, Context and Motivation
+How well is the context of the project described? Is a comprehensive background, including summary of previous/related work given? Is the project well placed into the context of existing work (including proper referencing of existing work). Is it clear why the project was undertaken and what new information it hopes to provide?
+
+### Feedback and Comments
+Great job on your explanation of the background relating to micro-plastics, I 
+enjoyed reading about your description of the history of micro-plastics and 
+their sources, as well as how primary and secondary micro-plastics relate 
+to one another. The description of waste water treatment plants as a major source
+of secondary micro-plastic pollution was well done.
+
+I was impressed with how many sources you cited, definitely loos like you've 
+done your research. 
+
+I think it would be beneficial to talk more in depth about motivation in the 
+project, you mention why micro-plastics are dangerous and bad for the environment,
+but I think adding a little about the potential benefits of reducing 
+micro-plastics to go along with why they are dangerous would make the project 
+overall feel more well-rounded.
+
+Also, it could be beneficial to mention one or two of your sources directly when
+discussing research to add credibility without needing to access citations directly (in abstract for instance).
+
+
+### Summary assessment (PICK ONE, DELETE THE OTHERS)
+* strong contextualization and motivation
+
+
+## Question description
+How well and clear are the question(s)/hypotheses the project aims to address described? Is it clear how the questions relate to the data?
+
+
+### Feedback and Comments
+I believe you did a good job in explaining what you project involves, especially
+in regards to what the project involves (collect relevant data on micro-plastics)
+and how this data was collected (community-based sample collection...). However,
+I believe that you could go a little more in depth (in abstract), about what 
+questions in particular you are trying to answer, as well as how those questions
+relate to the data.
+
+You state what the project is and what it does (established presence of micro-plastics), but if you also added some information on your main hypothesis
+being asked (in the abstract), I think that could help in immediate understanding when reading your project. I know you go more in depth on 2.1.4 Present Research,
+but even adding just your main question to the abstract could be good for 
+understanding.
+
+### Summary assessment
+* question/hypotheses somewhat clear
+
+
+## Data description
+How well is the data overall described? Is the source provided? Is a codebook or other meta-information available that makes it clear what the data is? 
+
+### Feedback and Comments
+You do a good job describing the data you're using as well as where it comes from
+and the methods they are using to create the data (vacuum filtration, using Whatman, etc.). I also like how instead of having a general data section, you
+include all supplemental data in its' own section for ease of access and understanding along with citations to the respective organizations. 
+
+### Summary assessment
+* source and overall structure of data well explained
+
+
+## Data wrangling and exploratory analysis
+How well is the data cleaned/processed and explored? Are all steps reasonable and well explained? Are alternatives discussed and considered? Are meaningful exploratory results shown (e.g. in the supplementary materials)?
+
+### Feedback and Comments
+The data cleaning that you did was well explained, and every additional
+step you did to create more pertinent data had sufficient explanation as to why
+you felt that it was necessary or needed. 
+
+For your exploratory analysis you did a good job of explaining what your main
+outcome was as well as your methods you used to determine statistical 
+significance, the only thing I would suggest is to include all variables used 
+in your analysis (or maybe even data cleaning) section to allow for further 
+understanding when reading your manuscript. 
+
+
+### Summary assessment
+* essentially no weaknesses in wrangling and exploratory component
+
+
+
+## Appropriateness of Analysis
+Were the analysis methods appropriate for the data? Was the analysis done properly? Were different components of the analysis (e.g. performance measure, variable selection, data pre-processing, model evaluation) done in the best way possible and explained well?
+
+### Feedback and Comments
+The analysis methods used seem to be appropriate for your data and the analysis
+seems to have been done properly. I think it would be good to include more 
+information in your analysis about why you chose the variables you did, as 
+well as why you decided to choose RMSE for your performance measure (I know you talked about it in 4.3 Full Analysis, but I think a bit of info would be helful here as well). Doesn't have to be a ton of information but just a few lines could add a lot here.
+(analysis section of manuscript)
+
+I know you include what the variables are under 4.2 Bivariate Analysis, but 
+I think a few lines identifying what they are before hand would be good.
+
+
+### Summary assessment
+* defensible but not optimal analysis 
+
+
+## Presentation
+How well are results presented? Are tables and figures easy to read and understand? Are the main figures/tables publication level quality? 
+
+### Feedback and Comments
+The results were very well presented, the tables and figures were easy to read and
+understand, in particular I really found the seasonal maps interesting (although a little difficult to read) and was really impressed with them. In addiition,
+the Land cover matrix was an interesting chart and was more exciting to look at 
+then traditional linear regression charts (looks good too).
+
+I also like how you make sure to specify why you chose the LASSO model and mentioned the RMSE of each model as comparisons.
+### Summary assessment
+* results are very well presented
+
+
+## Discussion/Conclusions
+Are the study findings properly discussed? Are strengths and limitations acknowledged? Are findings interpreted properly?
+
+### Feedback and Comments
+I thought it was cool that this research establishes a baseline of the presence of micro-plastics in the Athens, GA area for the future. I also think that you did 
+a good job describing conclusion (nothing can be confirmed via the analysis
+but stating how micro-plastics do contaminate even in remote places). I also
+think you did well going into more detail about strength and limitations, including the fact that the research is a student-led pilot and the accuracy of the methods used (as well as traditional methods accompanying research).
+
+### Summary assessment
+* discussion is complete and well done
+
+
+
+## Further comments
+Overall I am really impressed with your project, everything looks really professional and there are a large number of cited sources. Tables and charts are (for the most part- maps are a little hard to read), easily read and understood
+and are beneficial to understanding research made.
+
+
+# Overall project content evaluation
+Evaluate overall features of the project  by filling in the sections below.
+
+
+## Structure
+Is the project well structured? Are files in well labeled folders? Do files have reasonable names? Are all "junk" files not needed for analysis/reproduction removed? By just looking at files and folders, can you get an idea of how things fit together?
+
+### Feedback and Comments
+The structure of the project is well done and replicating is easy with all steps
+adequately explained in read.me on github, as well as in the actual paper itself
+
+### Summary assessment
+* well structured
+
+
+## Documentation 
+How well is the project documented? Are you able to understand each step of the whole analysis, each decision that was made, and each line of code? Is enough information provided as comments in code or as part of Rmd files? 
+
+### Feedback and Comments
+The project is documented well, there is ample explanation for why each step of the analysis was done the way it was, and the files do a suitable job at explaining the process and reasons behind it.
+
+### Summary assessment
+* fully and well documented
+
+
+
+## Reproducibility
+Are all results fully reproducible? Is documentation provided which clearly explains how to reproduce things, and does it work without the need for any manual intervention? Are you able to re-run the whole analysis without having to do manual interventions/edits?
+
+### Feedback and Comments
+Project is completely reproducible without any manual intervention
+
+
+### Summary assessment
+* fully reproducible without issues
+
+
+## Thoroughness
+How thorough was the overall study? Were alternatives (e.g. different ways of processing the data or different models) considered? Were alternatives discussed? Were the questions/hypotheses fully and thoroughly addressed?
+
+### Feedback and Comments
+Great job in explaining the process of the research and what your goal was,
+you could possibly elaborate more in your conclusion section (or even a bit before), about possible alternative methods that could be used or measures of association besides RMSE that may be suitable. 
+
+### Summary assessment
+* decent level of thoroughness
+
+
+
+## Further comments
+I don't have any further comments than what I have already written, great project,
+really impressed with the whole thing.
+
+
+
+
