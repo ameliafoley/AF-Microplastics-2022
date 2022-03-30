@@ -1,0 +1,198 @@
+---
+title: "results"
+output: html_document
+---
+
+#load packages and data
+```{r}
+library(ggplot2) #for plotting
+library(broom) #for cleaning up output from lm()
+library(here) #for data loading/saving
+library(tidymodels) #for modeling
+library(gridExtra) #for exporting tables
+library(gridExtra) #for savings images in grids
+library(dplyr)
+
+mp <- readRDS(here("data", "processed_data", "mpwrfcombo.rds"))
+sampledata <- readRDS(here("data", "processed_data", "fullsampledata.rds"))
+```
+
+# find CV for first three sample dates (within subject A -> B)
+```{r}
+sample_three <- sampledata %>% filter(!date == "july_21") # remove July samples (counted by volunteers, not by self)
+
+sample <- sample_three %>% select(a_count, b_count)
+matrix_sample <- data.matrix(sample)
+
+sample <- sample %>% mutate(cv = (Rfast::rowcvs(matrix_sample, ln = FALSE)*100))
+
+mean(sample$cv)
+median(sample$cv)
+```
+
+Woah - CVs for samples counted by me personally are averaging 20 - 26 for CV%. This is quite different from the volunteer counts. What does this say about the precision of volunteer counted-data? 
+
+# CV vs MP concentration
+```{r}
+# this was performed in the Barrows paper - looks at how variation correlates with concentration - previous findings showed that high-concentration sites had less variability among replicates
+
+# create dataframe for all sites with CV values and concentration values
+# average A and C and B and D counts so that they can be compared to the other sample dates for variation
+avg_cd <- sampledata %>% filter(date == "july_21") %>% mutate(a_count = ((a_count+c_count)/2)) %>% mutate(b_count = ((b_count+d_count/2)))
+
+# combine averaged july data with other three seasons of data
+all_counts_cv <- full_join(avg_cd, sample_three)
+
+# keep only useful variables
+all_counts_part <- all_counts_cv %>% select(a_count, b_count, particles_l, date)
+all_counts_cv <- all_counts_cv %>% select(a_count, b_count) # don't include particles/L so it won't be calculated with CV
+
+# create matrix
+all_counts_matrix <- data.matrix(all_counts_cv)
+# mutate new variable to add CV
+all_counts_cv <- all_counts_cv %>% mutate(cv = (Rfast::rowcvs(all_counts_matrix, ln = FALSE)*100))
+# add MP concentration back in using join
+all_counts_cv <- left_join(all_counts_cv, all_counts_part)
+```
+# plot MP concentration vs CV
+```{r}
+ggplot(all_counts_cv, aes(x = particles_l, y = cv)) + geom_point() + geom_smooth(method = lm) + labs(title = "Coefficient of Variance vs. Microplastic Concentration ", x = "Particles/L", y = "Coefficient of Variance %") + scale_x_continuous(trans='log10') # use log scale to better visualize all points
+```
+
+Wonder if I can make this graph and have point colors correlate to sample dates. That would be interesting
+# Adding color to graph
+```{r}
+ggplot(all_counts_cv, aes(x = particles_l, y = cv, color = date)) + geom_point() + labs(title = "Coefficient of Variance vs. Microplastic Concentration ", x = "Particles/L", y = "Coefficient of Variance %") + scale_x_continuous(trans='log10') # use log scale to better visualize all points
+```
+
+There appears to be a negative correlation between CV and microplastic concentration, which is consistent with what's reported in the Barrows paper
+
+## Next, let's do a Kruskal Wallis test (basically a non-parametic one-way ANOVA, that considers more than two groups)
+```{r}
+kruskal.test(particles_l ~ date, data = all_counts_cv)
+```
+
+P=value less than 0.05 - we conclude that there IS a significant difference between groups (though we don't yet know between what groups). From here, we may use the pairwise.wilcox.test() to calculate pairwise comparison
+# pairwise wilcox test to see differences between groups
+```{r}
+pairwise.wilcox.test(all_counts_cv$particles_l, all_counts_cv$date,
+                 p.adjust.method = "BH")
+```
+
+The only significant difference is between April and February sample dates. (in Barrows, March had the highest concentration)
+
+Could perform regression analysis to compare original samples and corresponding duplicates over 1 year study period (using this language from the Barrows paper)
+(or does this mean between A and B duplicates?) Let's try
+# linear regression for duplicates over study period
+```{r}
+#linear regression model specification set up
+lm_mod <- linear_reg() %>% set_engine("lm")
+#estimating/training linear model
+lm_fit_dup <- lm_mod %>% fit(a_count ~ b_count, data = all_counts_cv)
+#save table
+lm_fit_dup_table <- tidy(lm_fit_dup)
+#view summary of fit
+(lm_fit_dup)
+summary(lm_fit_dup)
+#save file
+saveRDS(lm_fit_dup_table, file = here("results", "lm_fit_dup_table.rds"))
+
+model = lm(a_count ~ b_count, data = all_counts_cv)
+summary(model)
+```
+
+p-value is <0.05 and multiple r-squared value is 0.7824
+p-value indicates that the model reflects a signficant relationship
+r-squared is "degree to which the data is explained by the model" --> 78% of variability is explained by the model
+
+```{r}
+#visualize linear model
+lm_dup <- ggplot(all_counts_cv, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "MP Concentration Duplicate Counts", x = "A Count", y = "B Count")
+lm_dup
+```
+
+It appears that the duplicate counts are pretty well correlated. 
+
+# want to test for significant difference within a group to see if sites are signficantly different/if the distribution of MP concentrations is signficant
+```{r}
+kruskal.test(particles_l ~ site, data = sampledata)
+```
+
+Seen in Barrows paper - other researchers found concentrations at 70 - 100 particles/L
+
+Try to make plot to compare sites over seasons
+```{r}
+sampledata %>% filter(date == "nov_20") %>% ggplot(aes(x = site, y = particles_l, color = )) + 
+  geom_point()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Site", x = "Site", y = "Particles/Liter") + ylim(0,500) + scale_y_continuous(trans='log10')
+```
+
+```{r}
+# feb 2021
+sampledata %>% filter(date == "feb_21") %>% ggplot(aes(x = site, y = particles_l, color = )) + 
+  geom_point()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Site", x = "Site", y = "Particles/Liter") + ylim(0,500) + scale_y_continuous(trans='log10')
+
+# april 2021
+sampledata %>% filter(date == "apr_21") %>% ggplot(aes(x = site, y = particles_l, color = )) + 
+  geom_point()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Site", x = "Site", y = "Particles/Liter") + ylim(0,500) + scale_y_continuous(trans='log10')
+
+# july 2021
+sampledata %>% filter(date == "july_21") %>% ggplot(aes(x = site, y = particles_l, color = )) + 
+  geom_point()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Site", x = "Site", y = "Particles/Liter") + ylim(0,500) + scale_y_continuous(trans='log10')
+```
+
+It could be interesting to have a table listing all of the site, and the concentration for each sample date in columns to the side. this might be easier to interpret than a graph for this type of data. 
+```{r}
+table <- sampledata %>% select(particles_l, site, date)
+
+table %>% rowwise()
+reshape(sampledata, idvar = "site", timevar = "date", direction = "wide")
+```
+```{r}
+table$date <- factor(table$date , levels=c("nov_20", "feb_21", "apr_21", "july_21")) #reorder dates to appear chronologically
+# transform to wide data
+data_wide <- spread(table, date, particles_l)
+data_wide #display new data
+# display decimal places upto 1
+data_wide$nov_20<-format(round(data_wide$nov_20,1),nsmall=1)
+data_wide$feb_21<-format(round(data_wide$feb_21,1),nsmall=1)
+data_wide$apr_21<-format(round(data_wide$apr_21,1),nsmall=1)
+data_wide$july_21<-format(round(data_wide$july_21,1),nsmall=1)
+```
+
+goals: 
+- look at differences in average watershed concentration over time
+
+- test for difference between watershed groups
+```{r}
+#difference between watershed groups
+kruskal.test(particles_l ~ watershed, data = sampledata)
+```
+
+P-value is greater than 0.05, there is NOT a signficant difference between watershed concentrations
+
+#avg watershed concentration over time
+```{r}
+watershed_time <- group_by(sampledata, watershed, date) %>%
+             summarise(particles_l = mean(particles_l, na.rm = TRUE))
+kruskal.test(particles_l ~ date, data = watershed_time)
+
+barber_creek <- watershed_time %>% filter(watershed == "Barber Creek")
+kruskal.test(particles_l ~ date, barber_creek)
+
+hunnicutt_creek <- watershed_time %>% filter(watershed == "Hunnicutt Creek")
+kruskal.test(particles_l ~ date, hunnicutt_creek)
+
+north_oconee_river <- watershed_time %>% filter(watershed == "North Oconee River")
+kruskal.test(particles_l ~ date, north_oconee_river)
+
+
+```
+

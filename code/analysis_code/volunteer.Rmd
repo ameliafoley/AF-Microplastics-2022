@@ -1,0 +1,121 @@
+---
+title: "volunteer_analysis"
+output: html_document
+---
+
+# VOLUNTEER ANALYSIS#
+Here, I will compare the counts performed by two separate volunteers on the same set of samples, so evaluate the use of citizen science volunteers to precisely count MPs (precision > accuracy)
+
+# load packages and data
+```{r}
+library(tidyverse)
+library(ggplot2) #for plotting
+library(broom) #for cleaning up output from lm()
+library(here) #for data loading/saving
+library(tidymodels) #for modeling
+library(gridExtra) #for exporting tables
+library(gridExtra) #for savings images in grids
+library(MASS) #for Wilcoxon signed rank test
+library(Rfast) # for column-wise coefficient of variation
+
+data <- readRDS(here("data", "processed_data", "volunteer.rds"))
+```
+
+I want to compare a_count and c_count, and b_count and d_count. I could do this using a paired t-test for matched pairs. Paired t-test can only be used for normal distribution. This can be checked with Shapiro-Wilk test. 
+# Shapiro-wilk test for normality
+```{r}
+shapiro.test(data$a_count)
+shapiro.test(data$b_count)
+shapiro.test(data$c_count)
+shapiro.test(data$d_count)
+```
+
+P-value < 0.05, meaning that each variable IS significantly different from a normal distribution. 
+
+Instead, we can use the non-parametric Wilcoxon signed rank test
+
+# Wilcoxon signed rank
+```{r}
+# comparing the A filter by a_count and c_count
+wilcox.test(data$a_count, data$c_count, paired=TRUE) 
+# comparing the B filter by b_count and d_count
+wilcox.test(data$b_count, data$d_count, paired=TRUE) 
+```
+
+## A filter
+P-value > 0.05, we can conclude that a_count and c_count are NOT significantly different; we FAIL to reject the null hypothesis
+
+## B filter
+P-value > 0.05, we can conclude that b_count and d_count are NOT significantly different; we FAIL to reject the null hypothesis
+
+# Is the total particles/L count impacted by small differences in individual counts? 
+```{r}
+# Let's test particles_l and rep_particles_l to be sure
+wilcox.test(data$particles_l, data$rep_particles_l, paired=TRUE) 
+```
+
+Here, we see that the p-value still exceeds 0.05, indicating that there is not a signficant difference between the replicates. 
+
+Let's also use the coefficient of variation to evaluate the difference in volunteer counts of the same filters.
+# Coefficient of variation
+```{r}
+# let's make a subset of data, so that we can do some row-wise calculations\
+subset_a <- data %>% dplyr::select(a_count, c_count)
+subset_b <- data %>% dplyr::select(b_count, d_count)
+
+matrix_a <- data.matrix(subset_a)
+matrix_b <- data.matrix(subset_b)
+
+# calculate cv row-wise
+rowcvs(matrix_a, ln = FALSE)
+rowcvs(matrix_b, ln = FALSE)
+```
+
+I think we need to multiply these values by 100 to achieve CV %
+Ideally, we'd have these as another column in our dataset for easy reading. Let's see if we can use mutate to do this. 
+```{r}
+subset_a <- subset_a %>% mutate(cv = (rowcvs(matrix_a, ln = FALSE)*100))
+subset_b <- subset_b %>% mutate(cv = (rowcvs(matrix_b, ln = FALSE)*100))
+
+#average CV for A filters
+mean(subset_a$cv)
+#average CV for B filters
+mean(subset_b$cv)
+
+#median CV for A filters
+median(subset_a$cv)
+#median CV for B filters
+median(subset_b$cv)
+
+```
+
+Here, we see that the average CV lies between approximately 50-60%. This is a little high. We also want to look at the median to account for possible outliers (a few rogue volunteers)
+
+We see that the medians fall between 43 and 60. This is not too different from our means. This may indicate substantial variation in results between replicate counts. 
+
+## we can also calculate CV based on replicate concentration (rather than indvidual filters)
+```{r}
+conc_rep <- data %>% dplyr::select(particles_l, 
+                            rep_particles_l)
+matrix_c <- data.matrix(conc_rep)
+conc_rep <- conc_rep %>% mutate(cv = (rowcvs(matrix_c, ln = FALSE)*100))
+
+mean(conc_rep$cv)
+median(conc_rep$cv)
+```
+
+Here, we see similar CV values at 56 (mean) and 60 (median) - this indicates that the comparison of calculated concentrations may be representative of the comparison between individual filter set replicates. 
+
+Could also be helpful to calculate CV of variation between all counts for July volunteer data. We could then comapre this CV to the CV for my own counts from the three prior sample dates. 
+# Cumulative CV
+```{r}
+cumul_cv <- data %>% dplyr::select(a_count, b_count, c_count, d_count)
+
+matrix_cumul <- data.matrix(cumul_cv)
+
+cumul_cv <- cumul_cv %>% mutate(cv = (rowcvs(matrix_cumul, ln = FALSE)*100))
+
+mean(cumul_cv$cv)
+```
+
+The average overall coefficient of variation is 58 for volunteer-counted results. 

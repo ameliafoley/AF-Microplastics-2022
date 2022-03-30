@@ -103,7 +103,8 @@ julydata <- sampledata %>% filter(date == "july_21") %>% mutate(
 otherdata <- sampledata %>% filter(!date== "july_21") #to rejoin later
 
 #merging mutated data
-cleansampledata <- full_join(otherdata, julydata) %>% select(-"id",
+fullsampledata <- full_join(otherdata, julydata) # to preserve a and b counts
+cleansampledata <- fullsampledata %>% select(-"id",
                                                          -"id2",
                                                          -"rep_particles_l",
                                                          -"a_count",
@@ -119,10 +120,12 @@ cleansampledata <- full_join(otherdata, julydata) %>% select(-"id",
 save_data_location <- here::here("data","processed_data","cleansampledata.rds") 
 save_data_location1 <- here::here("data","processed_data","volunteer.rds") #saving july volunteer data to look at later
 save_data_location2 <- here::here("data","processed_data","controldata.rds")
+save_data_location3 <- here::here("data", "processed_data", "fullsampledata.rds")
 
 saveRDS(cleansampledata, file = save_data_location)
 saveRDS(volunteer, file = save_data_location1)
 saveRDS(controldata, file = save_data_location2)
+saveRDS(fullsampledata, file = save_data_location3)
 
 # Here, I'll also load some data we'll want to look at later. The csv file being 
 # imported contains the coordinates for Athens' three water reclamation facilities (WRF)
