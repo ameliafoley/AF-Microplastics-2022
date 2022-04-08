@@ -1,0 +1,125 @@
+---
+title: "particle_type"
+output: html_document
+---
+
+```{r}
+library(ggplot2) #for plotting
+library(broom) #for cleaning up output from lm()
+library(here) #for data loading/saving
+library(tidymodels) #for modeling
+library(gridExtra) #for exporting tables
+library(gridExtra) #for savings images in grids
+library(dplyr)
+library(readxl) #for loading Excel files
+
+type <- read_excel(here("data", "raw_data", "copy_part.xlsx"))
+```
+
+# cleaning data
+```{r}
+# this data set is a litte larger than we need. let's remove some unneccesary variables
+a_and_b <- type %>% select("fragment", 
+                           "fiber", 
+                           "bead", 
+                           "foam", 
+                           "pellet",
+                           "film",
+                           "fragment_b", 
+                           "fiber_b", 
+                           "bead_b", 
+                           "foam_b", 
+                           "pellet_b", 
+                           "film_b")
+
+c_and_d <- type %>% select("fragment_c", 
+                           "fiber_c", 
+                           "bead_c", 
+                           "foam_c", 
+                           "pellet_c",
+                           "film_c",
+                           "fragment_d", 
+                           "fiber_d", 
+                           "bead_d", 
+                           "foam_d", 
+                           "pellet_d", 
+                           "film_d")
+summary(a_and_b)
+```
+
+```{r}
+#summary for a and b counts
+colSums(a_and_b, na.rm = TRUE)
+
+#summary for c and d counts
+colSums(c_and_d, na.rm = TRUE)
+```
+
+```{r}
+part <- type %>% select("fragment", 
+                           "fiber", 
+                           "bead", 
+                           "foam", 
+                           "pellet",
+                           "film",
+                           "fragment_b", 
+                           "fiber_b", 
+                           "bead_b", 
+                           "foam_b", 
+                           "pellet_b", 
+                           "film_b", 
+                        "fragment_c", 
+                           "fiber_c", 
+                           "bead_c", 
+                           "foam_c", 
+                           "pellet_c",
+                           "film_c",
+                           "fragment_d", 
+                           "fiber_d", 
+                           "bead_d", 
+                           "foam_d", 
+                           "pellet_d", 
+                           "film_d")
+part[is.na(part)] <- 0 # replace NA with 0
+
+part <- part %>% mutate(fragment_avg_a = ((fragment + fragment_c)/2)) 
+part <- part %>% mutate(fragment_avg_b = ((fragment_b + fragment_d)/2)) 
+part <- part %>% mutate(fiber_avg_a = ((fiber + fiber_c)/2)) 
+part <- part %>% mutate(fiber_avg_b = ((fiber_b + fiber_d)/2))
+part <- part %>% mutate(bead_avg_a = ((bead + bead_c)/2))  
+part <- part %>% mutate(bead_avg_b = ((bead_b + bead_d)/2))     
+part <- part %>% mutate(foam_avg_a = ((foam + foam_c)/2)) 
+part <- part %>% mutate(foam_avg_b = ((foam_b + foam_d)/2)) 
+part <- part %>% mutate(pellet_avg_a = ((pellet + pellet_c)/2))
+part <- part %>% mutate(pellet_avg_b = ((pellet_b + pellet_d)/2)) 
+part <- part %>% mutate(film_avg_a = ((film + film_c)/2))
+part <- part %>% mutate(film_avg_b = ((film_b + film_d)/2))
+
+sum <- part %>% select(25:36)
+colSums(sum)
+
+sum <- sum %>% mutate(fragment = fragment_avg_a + fragment_avg_b, 
+                      fiber = fiber_avg_a + fiber_avg_b, 
+                      bead = bead_avg_a + bead_avg_b, 
+                      foam = foam_avg_a + foam_avg_b, 
+                      pellet = pellet_avg_a + pellet_avg_b, 
+                      film = film_avg_a + film_avg_b) %>% select(13:18)
+
+colSums(sum)
+# this gives us a small dataframe with just the total for each particle type
+part_sum <- enframe(colSums(sum))
+```
+
+Now, we have a breakdown of total particle type (added between A and B filters). A and B counts were determined by averaging the duplicate volunteer counts performed on singular filters. 
+
+Let's see how we can visualize this breakdown. Remember that this is just for the July sample date, not for all 4 sample dates (we are looking at a subset).
+
+```{r}
+
+part_sum %>% ggplot(aes(x = name, y = value, fill = name)) + 
+  geom_col() + geom_text(aes(label = percent((value/559)), #total particles is 559
+                             vjust = -0.5, #above bar
+                             position = position_dodge(width=0.9)) + ylim(0, 350) #makes 60% visible
+```
+
+Perhaps we could add error bars, significant difference indications in this graph. 
