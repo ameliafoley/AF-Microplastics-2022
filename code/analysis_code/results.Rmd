@@ -277,3 +277,15 @@ pairwise.wilcox.test(body$particles_l, body$body,
 ```
 
 This tells us that there is a significant difference between the MP concentrations in rivers and tributaries! Cool! We can try to tweak this boxplot figure to display those statistics, perhaps. 
+# more figures for main rivers vs tribs
+```{r}
+body %>% ggplot(aes(x = date, y = particles_l, color = body, group = body)) + 
+  geom_point() + geom_path() + scale_color_discrete(name = "Water Body")+ 
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Water Body Microplastic Concentration Over Time", x = "Water Body", y = "Particles/Liter") + scale_x_discrete(labels=c("Fall 2020",
+                            "Winter 2021",
+                            "Spring 2021",
+                            "Summer 2021"))+ 
+  ylim(0,300) #removing outliers to better visualize majority of concentrations
+```
+

@@ -1,0 +1,62 @@
+---
+title: "density"
+output: html_document
+---
+
+```{r}
+library(ggplot2) #for plotting
+library(broom) #for cleaning up output from lm()
+library(here) #for data loading/saving
+library(tidymodels) #for modeling
+library(tigris)
+library(sp)
+
+options(tigris_year = 2019)
+```
+
+```{r}
+df <- tracts(state = 'GA', county = c('Clarke'), )
+plot(df)
+```
+The GEOID in the df dataframe matches our FIPS code for the population/sample data. Let's add the land area variable to the tractpopdata dataframe and then mutate a new variable to calculate population density. Then, we can compare population density to MP concentration. 
+
+```{r}
+pop <- readRDS(here("data", "processed_data", "tractpopdata.rds"))
+
+area <- df %>% select(GEOID, ALAND)
+
+combine <- left_join(pop, area, by = c("FIPS" = "GEOID"))
+
+#calculate pop density
+combine <- combine %>% mutate(density = population/ALAND)
+
+# plot MP concentration vs pop density
+
+combine %>% ggplot(aes(x = density, y = particles_l)) + geom_point() +
+  labs(title = "Microplastic Concentration vs Population Density", x = "Population Density", y = "Particles/Liter") + scale_y_log10() + scale_x_log10()
+
+```
+
+# use linear regression to confirm relationship
+```{r}
+#linear regression model specification set up
+lm_mod <- linear_reg() %>% set_engine("lm")
+#estimating/training linear model
+lm_fit <- lm_mod %>% fit(particles_l ~ density, data = combine)
+#save table
+lm_fittable <- tidy(lm_fit)
+#view summary of fit
+(lm_fit)
+summary(lm_fit)
+#save file
+#saveRDS(lm_fit_dup_table, file = here("results", "lm_fit_dup_table.rds"))
+
+model = lm(particles_l ~ density, data = combine)
+summary(model)
+```
+
+#calculate 60th percentile
+```{r}
+quantile(sampledata$particles_l, .60)
+```
+

@@ -119,3 +119,52 @@ mean(cumul_cv$cv)
 ```
 
 The average overall coefficient of variation is 58 for volunteer-counted results. 
+# CV bw A and B for July
+```{r}
+sample_july <- sampledata %>% filter(date == "july_21") # remove July samples (counted by volunteers, not by self)
+
+july <- sample_july %>% select(a_count, b_count)
+matrix_sample <- data.matrix(july)
+
+july <- july %>% mutate(cv = (Rfast::rowcvs(matrix_sample, ln = FALSE)*100))
+
+mean(july$cv)
+median(july$cv)
+```
+
+#CV for each sample date
+```{r}
+#november
+sample_nov <- sampledata %>% filter(date == "nov_20") 
+
+nov <- sample_nov %>% select(a_count, b_count)
+matrix_sample <- data.matrix(nov)
+
+nov <- nov %>% mutate(cv = (Rfast::rowcvs(matrix_sample, ln = FALSE)*100))
+
+mean(nov$cv)
+median(nov$cv)
+
+#february
+sample_feb <- sampledata %>% filter(date == "feb_21") 
+
+feb <- sample_feb %>% select(a_count, b_count)
+matrix_sample <- data.matrix(feb)
+
+feb <- feb %>% mutate(cv = (Rfast::rowcvs(matrix_sample, ln = FALSE)*100))
+
+mean(feb$cv)
+median(feb$cv)
+
+#april
+sample_april <- sampledata %>% filter(date == "apr_21") # remove July samples (counted by volunteers, not by self)
+
+april <- sample_april %>% select(a_count, b_count)
+matrix_sample <- data.matrix(april)
+
+april <- april %>% mutate(cv = (Rfast::rowcvs(matrix_sample, ln = FALSE)*100))
+
+mean(april$cv)
+median(april$cv)
+```
+
