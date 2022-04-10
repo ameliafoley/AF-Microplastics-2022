@@ -12,6 +12,9 @@ library(tidymodels) #for modeling
 library(gridExtra) #for exporting tables
 library(gridExtra) #for savings images in grids
 library(dplyr)
+library(gridExtra) #for savings images in grids
+library(gridExtra) #for savings images in grids
+
 
 mp <- readRDS(here("data", "processed_data", "mpwrfcombo.rds"))
 sampledata <- readRDS(here("data", "processed_data", "fullsampledata.rds"))
@@ -107,11 +110,60 @@ r-squared is "degree to which the data is explained by the model" --> 78% of var
 
 ```{r}
 #visualize linear model
-lm_dup <- ggplot(all_counts_cv, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "MP Concentration Duplicate Counts", x = "A Count", y = "B Count")
+lm_dup <- ggplot(all_counts_cv, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "MP Concentration Duplicate Counts", x = "A Count", y = "B Count") + geom_abline(intercept = 0, slope = 1, colour='#E41A1C') + scale_x_log10() + scale_y_log10()
 lm_dup
 ```
 
 It appears that the duplicate counts are pretty well correlated. 
+
+We could use this same type of graph to display the comparative CV for my counts vs volunteer counts by doing AvsB for sample dates 1-3 and then AvsB for sample date 4 or AvsC and BvsD
+
+#visualizing CV
+```{r}
+#visualize linear model
+#subset data
+all_counts_me <- all_counts_cv %>% filter(!date == "july_21") 
+#plot
+lm_me <- ggplot(all_counts_me, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "Duplicate Counts Nov, Apr, July", x = "A Count", y = "B Count") + xlim(0,25) + ylim(0,25) + geom_abline(intercept = 0, slope = 1, colour='#E41A1C')
+lm_me #show plot
+
+#subset data
+all_counts_vol <- all_counts_cv %>% filter(date == "july_21")
+#plot
+lm_vol <- ggplot(all_counts_vol, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "Volunteer Counts July", x = "A Count", y = "B Count") + xlim(0,25) + ylim(0,25) + geom_abline(intercept = 0, slope = 1, colour='#E41A1C')
+lm_vol #show plot
+```
+
+# CV for each sample date
+```{r}
+#nov
+nov <- all_counts_cv %>% filter(date == "nov_20")
+#plot
+lm_nov <- ggplot(nov, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "Nov", x = "A Count", y = "B Count") + scale_x_log10()+ scale_y_log10() + geom_abline(intercept = 0, slope = 1, colour='#E41A1C') + expand_limits(x = 0, y = 0) 
+lm_nov #show plot
+
+#feb
+feb <- all_counts_cv %>% filter(date == "feb_21")
+#plot
+lm_feb <- ggplot(feb, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "Feb", x = "A Count", y = "B Count") + scale_x_log10()+ scale_y_log10() + geom_abline(intercept = 0, slope = 1, colour='#E41A1C') 
+lm_feb #show plot
+
+#april
+april <- all_counts_cv %>% filter(date == "apr_21")
+#plot
+lm_apr <- ggplot(april, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "April", x = "A Count", y = "B Count") + scale_x_log10()+ scale_y_log10() + geom_abline(intercept = 0, slope = 1, colour='#E41A1C') 
+lm_apr #show plot
+
+#july
+all_counts_vol <- all_counts_cv %>% filter(date == "july_21")
+#plot
+lm_vol <- ggplot(all_counts_vol, aes(x = a_count, y = b_count)) + geom_point() + geom_smooth(method = lm) + labs(title = "July", x = "A Count", y = "B Count") + ylim(0,25) + scale_x_log10()+ scale_y_log10() + geom_abline(intercept = 0, slope = 1, colour='#E41A1C') + xlim(3,25) + ylim(3,30)
+lm_vol #show plot
+
+bivar_grid <- grid.arrange(lm_nov, lm_feb, lm_apr, lm_vol, ncol = 2)
+bivar_grid #show grid
+```
+
 
 # want to test for significant difference within a group to see if sites are signficantly different/if the distribution of MP concentrations is signficant
 ```{r}
@@ -195,4 +247,33 @@ kruskal.test(particles_l ~ date, north_oconee_river)
 
 
 ```
+# main rivers vs tributaries
+```{r}
+river <- sampledata %>% filter(watershed == "North Oconee River"|watershed == "Middle Oconee River"|watershed == "Oconee River") 
 
+trib <- sampledata %>% filter(!watershed == "North Oconee River", !watershed == "Middle Oconee River", !watershed == "Oconee River")
+
+river <- river %>% mutate(body = "river")
+trib <- trib %>% mutate(body = "trib")
+
+#rejoin
+body <- full_join(river, trib)
+
+#plot
+body %>% ggplot(aes(x = body, y = particles_l, color = )) + 
+  geom_boxplot()  +
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+  labs(title = "Microplastic Concentration by Water Body", x = "Water Body", y = "Particles/Liter") + ylim(0,500) + scale_y_log10()
+
+#kruskal wallis/mann whitney test - nonparametric test
+kruskal.test(particles_l ~ body, data = body)
+```
+
+P=value less than 0.05 - we conclude that there IS a significant difference between groups. Let's do a pairwise.wilcox.test() to double check. 
+# pairwise wilcox test to see differences between groups
+```{r}
+pairwise.wilcox.test(body$particles_l, body$body,
+                 p.adjust.method = "BH")
+```
+
+This tells us that there is a significant difference between the MP concentrations in rivers and tributaries! Cool! We can try to tweak this boxplot figure to display those statistics, perhaps. 

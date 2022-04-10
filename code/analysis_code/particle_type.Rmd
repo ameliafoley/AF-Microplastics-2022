@@ -116,7 +116,35 @@ Let's see how we can visualize this breakdown. Remember that this is just for th
 
 ```{r}
 part_sum %>% ggplot(aes(x = name, y = value, fill = name)) + 
-  geom_col() + geom_text(aes(label = percent(value/559), vjust = -0.5, position = position_dodge(width=0.9))) + ylim(0, 350) 
+  geom_col() + geom_text(aes(label = percent(value/559), vjust = -0.5)) + ylim(0,350) + guides(fill=guide_legend("Particle Type")) + labs(y = "Microplastic Composition")
+#position = position_dodge(width=0.9))) + ylim(0, 350) 
 ```
 
+
 Perhaps we could add error bars, significant difference indications in this graph. 
+
+#particle color breakdown (aggregate, for July only)
+```{r}
+# load particle color data
+color <- read_excel(here("data", "raw_data", "mp_color.xlsx"))
+
+# plot color data
+color %>% ggplot(aes(x = color, y = number, fill = color)) + 
+  geom_col() + geom_text(aes(label = percent(number/968), vjust = -0.5)) + ylim(0,420) + scale_fill_manual(values = c("black" = "gray0", "blue" = "royalblue2", "green" = "seagreen2", "other" = "yellow1", "red" = "red1", "transparent/white"= "white")) + labs(y = "Occurence") + guides(fill=guide_legend("Particle Color"))
+                                  
+#stacked
+
+#reorder
+color$color <- reorder(color$color, color$number) #largest to smallest
+# plot reordered stacked plot
+ggplot(data = color, aes(x = obs, y = number, fill = color)) + geom_bar(stat = "identity", position = "fill") + scale_fill_manual(values = c("black" = "gray0", "blue" = "royalblue2", "green" = "seagreen2", "other" = "yellow1", "red" = "red1", "transparent/white"= "white")) + labs(x = "", y = "Microplastic Composition") + guides(fill=guide_legend("Particle Color")) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+  
+ # geom_text(aes(label = paste0(percent(number/968))), position=position_stack(vjust=0.5), colour="white", size = 2)
+                                                                                                                                                       
+ # here is some code for adding % labels, but I can't get it to work without messing up the graph                                                       #geom_text(aes(label=paste0(sprintf("%1.1f", percent*100),"%")),
+                   #  position=position_stack(vjust=0.5), colour="white", size = 2)  
+```
+
