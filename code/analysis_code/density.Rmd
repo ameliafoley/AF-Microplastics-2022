@@ -15,8 +15,10 @@ options(tigris_year = 2019)
 ```
 
 ```{r}
-df <- tracts(state = 'GA', county = c('Clarke'), )
-plot(df)
+df_clarke <- tracts(state = 'GA', county = c('Clarke'))
+plot(df_clarke)
+
+df <- tracts(state = 'GA', county = c('Clarke', 'Oconee'))
 ```
 The GEOID in the df dataframe matches our FIPS code for the population/sample data. Let's add the land area variable to the tractpopdata dataframe and then mutate a new variable to calculate population density. Then, we can compare population density to MP concentration. 
 
@@ -58,5 +60,13 @@ summary(model)
 #calculate 60th percentile
 ```{r}
 quantile(sampledata$particles_l, .60)
+```
+
+#land cover distribution
+```{r}
+land_long <- athensland %>% pivot_longer(12:26)
+  
+land_long %>% ggplot(aes(x = name, y = value)) + geom_col() + 
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
 

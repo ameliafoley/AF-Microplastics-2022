@@ -217,6 +217,11 @@ figure_file = here("results","landmatrix.png")
 ggsave(filename = figure_file, plot=p8)
 ```
 
+# stats for land use, p-value for land use
+```{r}
+ggplot(data = land_long, aes(x = (value), y = (particles_l))) + geom_point() + facet_wrap(~name) +stat_cor(method = "spearman") 
+```
+
 In this plot, we are mainly looking at the row containing particles/L (the very bottom row). We do not see any strong correlations between microplastic level and local land use. 
 
 We also may want to see the variability of microplastic concentration at each individual site (rather than aggregate concentration) througout the seasons/sample dates. Let's take a look. 

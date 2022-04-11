@@ -147,4 +147,11 @@ ggplot(data = color, aes(x = obs, y = number, fill = color)) + geom_bar(stat = "
  # here is some code for adding % labels, but I can't get it to work without messing up the graph                                                       #geom_text(aes(label=paste0(sprintf("%1.1f", percent*100),"%")),
                    #  position=position_stack(vjust=0.5), colour="white", size = 2)  
 ```
+# particle type by water body
+```{r}
+ggplot(data = part_sum, aes(x = body, y = value, fill = name)) + geom_bar(stat = "identity", position = "fill") + labs(x = "", y = "Microplastic Composition") + guides(fill=guide_legend("Particle Color")) +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
 
