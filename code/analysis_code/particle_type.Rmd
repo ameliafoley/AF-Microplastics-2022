@@ -12,6 +12,7 @@ library(gridExtra) #for exporting tables
 library(gridExtra) #for savings images in grids
 library(dplyr)
 library(readxl) #for loading Excel files
+library(ggpubr)
 
 type <- read_excel(here("data", "raw_data", "copy_part.xlsx"))
 ```
@@ -98,12 +99,12 @@ part <- part %>% mutate(film_avg_b = ((film_b + film_d)/2))
 sum <- part %>% select(25:36)
 colSums(sum)
 
-sum <- sum %>% mutate(fragment = fragment_avg_a + fragment_avg_b, 
-                      fiber = fiber_avg_a + fiber_avg_b, 
-                      bead = bead_avg_a + bead_avg_b, 
-                      foam = foam_avg_a + foam_avg_b, 
-                      pellet = pellet_avg_a + pellet_avg_b, 
-                      film = film_avg_a + film_avg_b) %>% select(13:18)
+sum <- sum %>% mutate(Fragment = fragment_avg_a + fragment_avg_b, 
+                      Fiber = fiber_avg_a + fiber_avg_b, 
+                      Bead = bead_avg_a + bead_avg_b, 
+                      Foam = foam_avg_a + foam_avg_b, 
+                      Pellet = pellet_avg_a + pellet_avg_b, 
+                      Film = film_avg_a + film_avg_b) %>% select(13:18)
 
 colSums(sum)
 # this gives us a small dataframe with just the total for each particle type
@@ -115,37 +116,50 @@ Now, we have a breakdown of total particle type (added between A and B filters).
 Let's see how we can visualize this breakdown. Remember that this is just for the July sample date, not for all 4 sample dates (we are looking at a subset).
 
 ```{r}
-part_sum %>% ggplot(aes(x = name, y = value, fill = name)) + 
+part_sum %>% ggplot(aes(x = name, y = value)) + 
   geom_col() + geom_text(aes(label = percent(value/559), vjust = -0.5)) + ylim(0,350) + guides(fill=guide_legend("Particle Type")) + labs(y = "Microplastic Composition")
 #position = position_dodge(width=0.9))) + ylim(0, 350) 
 ```
 
 
-Perhaps we could add error bars, significant difference indications in this graph. 
+Perhaps we could add error bars, significant difference indications in this graph.
 
-#particle color breakdown (aggregate, for July only)
+#PARTICLE TYPE FIGURE
 ```{r}
+fig_part_type <- part_sum %>% ggplot(aes(x = name, y = value)) + 
+  geom_col() + geom_text(aes(label = percent(value/559), vjust = -0.5), size = 3) + ylim(0,380) + guides(fill=guide_legend("Particle Type")) + labs(y = "No. of Particles", x = "") + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust=1), axis.text.y=element_text(size=12))
+plot(fig_part_type) 
+
+```
+
+
+#PARTICLE COLOR FIGURE
+```{r}
+library(ggrepel)
 # load particle color data
 color <- read_excel(here("data", "raw_data", "mp_color.xlsx"))
 
-# plot color data
-color %>% ggplot(aes(x = color, y = number, fill = color)) + 
-  geom_col() + geom_text(aes(label = percent(number/968), vjust = -0.5)) + ylim(0,420) + scale_fill_manual(values = c("black" = "gray0", "blue" = "royalblue2", "green" = "seagreen2", "other" = "yellow1", "red" = "red1", "transparent/white"= "white")) + labs(y = "Occurence") + guides(fill=guide_legend("Particle Color"))
-                                  
-#stacked
-
-#reorder
-color$color <- reorder(color$color, color$number) #largest to smallest
 # plot reordered stacked plot
-ggplot(data = color, aes(x = obs, y = number, fill = color)) + geom_bar(stat = "identity", position = "fill") + scale_fill_manual(values = c("black" = "gray0", "blue" = "royalblue2", "green" = "seagreen2", "other" = "yellow1", "red" = "red1", "transparent/white"= "white")) + labs(x = "", y = "Microplastic Composition") + guides(fill=guide_legend("Particle Color")) +
-  theme(axis.title.x=element_blank(),
+color <- color %>%  mutate(color= str_to_title(color)) 
+color <- color %>% rename(Color = color)
+color$Color <- reorder(color$Color, color$number) #largest to smallest
+
+# plot color data
+fig_part_color <- color %>% ggplot(aes(x = Color, y = number, fill = Color)) + 
+  geom_col() + geom_text(aes(label = percent(number/968), vjust = -0.5), size = 3) + ylim(0,460) + scale_fill_manual(values = c("Black" = "gray0", "Blue" = "royalblue2", "Green" = "seagreen2", "Other" = "orange1", "Red" = "red1", "TRN/White"= "gray61")) + labs(x = "", y = "Microplastic Composition") + labs(y = "No. of Particles")  + theme_bw() + theme(legend.position = "none")+ theme(axis.text.x = element_text(angle = 45, hjust=1))
+plot(fig_part_color)
+#stacked
+#reorder
+
+
+
+
+ggplot(data = color, aes(x = obs, y = number, fill = Color)) + geom_bar(stat = "identity", position = "fill") + scale_fill_manual(values = c("Black" = "gray0", "Blue" = "royalblue2", "Green" = "seagreen2", "Other" = "orange1", "Red" = "red1", "Transparent/White"= "gray61")) + labs(x = "", y = "Microplastic Composition") + guides(fill=guide_legend("Particle Color")) +
+   geom_text(aes(label = percent(number/968)), size = 3, color = "white", position = position_fill(vjust = 0.5)) + theme_bw()+ theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
+plot(fig_part_color) 
   
- # geom_text(aes(label = paste0(percent(number/968))), position=position_stack(vjust=0.5), colour="white", size = 2)
-                                                                                                                                                       
- # here is some code for adding % labels, but I can't get it to work without messing up the graph                                                       #geom_text(aes(label=paste0(sprintf("%1.1f", percent*100),"%")),
-                   #  position=position_stack(vjust=0.5), colour="white", size = 2)  
 ```
 # particle type by water body
 ```{r}

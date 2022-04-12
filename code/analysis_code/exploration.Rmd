@@ -219,7 +219,8 @@ ggsave(filename = figure_file, plot=p8)
 
 # stats for land use, p-value for land use
 ```{r}
-ggplot(data = land_long, aes(x = (value), y = (particles_l))) + geom_point() + facet_wrap(~name) +stat_cor(method = "spearman") 
+ggplot(data = land_long, aes(x = value, y = particles_l)) + geom_point(size = .5) + facet_wrap(~name) + stat_cor(method = "spearman") + labs(x = "Total Area (sq. meters)", y = "Particles per Liter") + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
 
 In this plot, we are mainly looking at the row containing particles/L (the very bottom row). We do not see any strong correlations between microplastic level and local land use. 

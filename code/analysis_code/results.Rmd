@@ -8,6 +8,7 @@ output: html_document
 library(ggplot2) #for plotting
 library(broom) #for cleaning up output from lm()
 library(here) #for data loading/saving
+library(tidyverse)
 library(tidymodels) #for modeling
 library(gridExtra) #for exporting tables
 library(gridExtra) #for savings images in grids
@@ -65,27 +66,13 @@ ggplot(all_counts_cv, aes(x = particles_l, y = cv)) + geom_point() + geom_smooth
 
 #adding stats to graph
 ```{r}
-ggplot(all_counts_cv, aes(x = particles_l, y = cv)) + geom_point() +
-  stat_cor(method = "spearman")
+# with line of best fit
+ggplot(all_counts_cv, aes(x = particles_l, y = cv)) + geom_point() + geom_smooth(method = lm) + labs(x = "Particles per Liter", y = "Coefficient of Variance %") +
+  stat_cor(method = "spearman") + scale_x_continuous(trans='log10') + theme_bw() # use log scale to better visualize all points
   
-ggplot(all_counts_cv, aes(x = particles_l, y = cv)) + geom_point() + geom_smooth(method = lm) + labs(title = "Coefficient of Variance vs. Microplastic Concentration ", x = "Particles/L", y = "Coefficient of Variance %") +
-  stat_cor(method = "spearman") + scale_x_continuous(trans='log10') # use log scale to better visualize all points
 
-df %>% ggplot(aes(x = x , y = y)) +
-  geom_point() +
-  stat_cor(method = "spearman")
-  
-  geom_smooth(method = lm) + labs(title = "Coefficient of Variance vs. Microplastic Concentration ", x = "Particles/L", y = "Coefficient of Variance %") + scale_x_continuous(trans='log10') # use log scale to better visualize all points
-
-figure_s1_data %>% ggplot(aes(x = cases.reported.7dma/1.2, y = value)) +
-  geom_point() +
-  facet_grid(variable~target, scales = "free",  labeller = label_wrap_gen()) +
-  stat_cor(method = "spearman") +
-  ylab("Value") +
-  xlab("Reported Cases per 100K (7-Day Moving Average)")
-
-
-
+#no line of best fit
+ggplot(all_counts_cv, aes(x = particles_l, y = cv)) + geom_point() + labs(x = "Particles per Liter", y = "Coefficient of Variance %") + scale_x_continuous(trans='log10') + theme_bw() # use log scale to better visualize all points
 ```
 
 
@@ -107,6 +94,8 @@ P=value less than 0.05 - we conclude that there IS a significant difference betw
 ```{r}
 pairwise.wilcox.test(all_counts_cv$particles_l, all_counts_cv$date,
                  p.adjust.method = "BH")
+
+compare_means(particles_l ~ date, data = all_counts_cv, p.adjust.method = "BH")
 ```
 
 The only significant difference is between April and February sample dates. (in Barrows, March had the highest concentration)
@@ -286,12 +275,19 @@ trib <- trib %>% mutate(body = "trib")
 #rejoin
 body <- full_join(river, trib)
 
+#rename
+body$body <- fct_recode(body$body,
+                                 "Main Rivers" = "river",
+                                 "Tributaries" = "trib")
+pv <- body %>% summarize(p.value = round(kruskal.test(particles_l ~ body)$p.value, digits = 3))
+                                 
 #plot
 body %>% ggplot(aes(x = body, y = particles_l, color = )) + 
   geom_boxplot()  +
   theme(axis.text.x = element_text(angle = 45, hjust=1)) +
-  labs(title = "Microplastic Concentration by Water Body", x = "Water Body", y = "Particles/Liter") + ylim(0,500) + scale_y_log10() +
-  stat_cor(method = "spearman")
+  labs(x = "Water Body", y = "Particles per Liter") + ylim(0,500) + scale_y_log10() +
+    geom_text(data=pv, aes(x=1.5, y=900, label=paste0("Kruskal-Wallis\n p=",p.value))) + theme_bw()
+  
 
 #kruskal wallis/mann whitney test - nonparametric test
 kruskal.test(particles_l ~ body, data = body)
@@ -309,15 +305,79 @@ pairwise.wilcox.test(body$particles_l, body$body,
 ```
 
 This tells us that there is a significant difference between the MP concentrations in rivers and tributaries! Cool! We can try to tweak this boxplot figure to display those statistics, perhaps. 
-# more figures for main rivers vs tribs
+# figure with stats for seasons
 ```{r}
-body %>% ggplot(aes(x = date, y = particles_l, color = body, group = body)) + 
-  geom_point() + geom_path() + scale_color_discrete(name = "Water Body")+ 
+compare_means(particles_l ~ date,  data = body)
+my_comparisons <- list(c("nov_20", "feb_21"), c("nov_20", "apr_21"), c("nov_20", "july_21"), c("feb_21", "apr_21"), c("feb_21", "july_21"), c("apr_21", "july_21"))
+
+fig_season <- body %>% ggplot(aes(x = date, y = particles_l, group = date)) + 
+  geom_boxplot() + scale_color_discrete(name = "Water Body")+ 
   theme(axis.text.x = element_text(angle = 45, hjust=1)) +
-  labs(title = "Water Body Microplastic Concentration Over Time", x = "Water Body", y = "Particles/Liter") + scale_x_discrete(labels=c("Fall 2020",
+  labs(x = "Sample Date", y = "Particles per Liter") + scale_x_discrete(labels=c("Fall 2020",
                             "Winter 2021",
                             "Spring 2021",
-                            "Summer 2021"))+ 
-  ylim(0,300) #removing outliers to better visualize majority of concentrations
+                            "Summer 2021"))+ theme_bw() + stat_compare_means(comparison=my_comparisons, p.adjust.method = "BH") + stat_compare_means(label.y = 5) + scale_y_log10()
+plot(fig_season)
+```
+#arrange figures
+```{r}
+#map
+#Load Libraries 
+library(tidyverse)
+library(viridis)
+library(ggpubr)
+#Load data
+sites = readRDS(here::here("data","processed_data","mpwrfcombo.rds"))
+sites$date = as.factor(sites$date)
+sites$date = recode(sites$date, nov_20 = "Nov 2020", feb_21 = "Feb 2021", apr_21 = "April 2021", july_21 = "July 2021")
+sites$date = ordered(sites$date, levels = c("Nov 2020", "Feb 2021", "April 2021", "July 2021"))
+sites %>% ggplot(aes(x = date, y = site, fill= particles_l)) + 
+  geom_tile() + 
+  scale_fill_viridis() + 
+  theme_bw() +
+  ylab("Site") + 
+  xlab("Collection Period") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(x = date, y = site, label = round(particles_l))) +
+  labs(fill = "Particles per Liter")  
+  #ggtitle("Seasonality of Microplastics Concentration")
+sites %>% ggplot(aes(x = date, y = site, fill= log10(particles_l))) + 
+  geom_tile() + 
+  scale_fill_viridis() + 
+  theme_bw() +
+  ylab("Site") + 
+  xlab("") + 
+  scale_x_discrete(position = "top") +
+  #theme(axis.text.x = element_text(angle = 45)) +
+  geom_text(aes(x = date, y = site, label = round(log10(particles_l), 2))) +
+  labs(fill = "Log10(Particles/Liter)") + 
+  theme(legend.position = "bottom")
+  #ggtitle("Seasonality of Microplastics Concentration")
+hist_all = sites %>% ggplot(aes(x = particles_l)) + 
+  geom_histogram() + 
+  theme_bw() + 
+  #facet_wrap(~date) +
+  xlab("Particles per Liter") + 
+  ylab("No. of Observations") +
+  theme(axis.text.y=element_text(size=12))
+hist_season = sites %>% ggplot(aes(x = particles_l)) + 
+  geom_histogram() + 
+  theme_bw() + 
+  facet_wrap(~date) +
+  xlab("Particles per Liter") + 
+  ylab("No. of Observations") +
+  theme(axis.text.y=element_text(size=12))
+fig2 = ggarrange(hist_all, hist_season, ncol = 2)
+plot(fig2)
+sites %>% group_by(date) %>% tally()
+
+
+#particle type = fig_part_type
+#particle color = fig_part_color
+quad1 <- ggarrange(hist_all, hist_season, fig_part_type, fig_part_color, nrow = 2, ncol = 2, labels = "AUTO", vjust = 1) 
+#%>% ggexport(filename = here("results","manuscript_figures", "quad_1.png"))
+plot(quad_1)
+
+ggsave(filename = here("results","manuscript_figures", "quad_1.png")) #export resolution than ggexport
 ```
 

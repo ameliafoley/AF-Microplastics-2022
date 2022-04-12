@@ -66,7 +66,7 @@ quantile(sampledata$particles_l, .60)
 ```{r}
 land_long <- athensland %>% pivot_longer(12:26)
   
-land_long %>% ggplot(aes(x = name, y = value)) + geom_col() + 
-  theme(axis.text.x = element_text(angle = 45, hjust=1))
+land_long %>% ggplot(aes(x = name, y = value)) + geom_col() + theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust=1)) + labs(x = "Land Cover", y = "Total Area (sq. meters)")
 ```
 
