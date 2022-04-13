@@ -376,7 +376,7 @@ sites %>% group_by(date) %>% tally()
 #particle color = fig_part_color
 quad1 <- ggarrange(hist_all, hist_season, fig_part_type, fig_part_color, nrow = 2, ncol = 2, labels = "AUTO", vjust = 1) 
 #%>% ggexport(filename = here("results","manuscript_figures", "quad_1.png"))
-plot(quad_1)
+plot(quad1)
 
 ggsave(filename = here("results","manuscript_figures", "quad_1.png")) #export resolution than ggexport
 ```

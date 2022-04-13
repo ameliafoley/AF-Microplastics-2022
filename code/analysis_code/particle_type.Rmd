@@ -127,7 +127,15 @@ Perhaps we could add error bars, significant difference indications in this grap
 #PARTICLE TYPE FIGURE
 ```{r}
 fig_part_type <- part_sum %>% ggplot(aes(x = name, y = value)) + 
-  geom_col() + geom_text(aes(label = percent(value/559), vjust = -0.5), size = 3) + ylim(0,380) + guides(fill=guide_legend("Particle Type")) + labs(y = "No. of Particles", x = "") + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust=1), axis.text.y=element_text(size=12))
+  geom_col() + 
+  geom_text(aes(label = percent(value/559), vjust = -0.5), size = 3) + 
+  ylim(0,380) + 
+  guides(fill=guide_legend("Particle Type")) + 
+  labs(y = "No. of Particles", x = "") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust=1), 
+        axis.text.y=element_text(size=12)) + 
+  annotate("text", x = 5, y = 300, label = "n = 559")
 plot(fig_part_type) 
 
 ```
@@ -145,8 +153,17 @@ color <- color %>% rename(Color = color)
 color$Color <- reorder(color$Color, color$number) #largest to smallest
 
 # plot color data
-fig_part_color <- color %>% ggplot(aes(x = Color, y = number, fill = Color)) + 
-  geom_col() + geom_text(aes(label = percent(number/968), vjust = -0.5), size = 3) + ylim(0,460) + scale_fill_manual(values = c("Black" = "gray0", "Blue" = "royalblue2", "Green" = "seagreen2", "Other" = "orange1", "Red" = "red1", "TRN/White"= "gray61")) + labs(x = "", y = "Microplastic Composition") + labs(y = "No. of Particles")  + theme_bw() + theme(legend.position = "none")+ theme(axis.text.x = element_text(angle = 45, hjust=1))
+fig_part_color <- color %>% ggplot(aes(x = Color, y = number, fill = Color)) +
+  geom_col() + 
+  geom_text(aes(label = percent(number/968), vjust = -0.5), size = 3) + 
+  ylim(0,300) + 
+  scale_fill_manual(values = c("Black" = "gray0", "Blue" = "royalblue2", "Green" = "seagreen2", "Other" = "orange1", "Red" = "red1", "TRN/White"= "gray61")) + labs(x = "", y = "Microplastic Composition") + 
+  labs(y = "No. of Particles")  + 
+  theme_bw() + 
+  theme(legend.position = "none")+ 
+  theme(axis.text.x = element_text(angle = 45, hjust=1), 
+        axis.text.y = element_text(size = 12)) + 
+  annotate("text", x = 2, y = 200, label = "n = 484")
 plot(fig_part_color)
 #stacked
 #reorder
@@ -157,7 +174,8 @@ plot(fig_part_color)
 ggplot(data = color, aes(x = obs, y = number, fill = Color)) + geom_bar(stat = "identity", position = "fill") + scale_fill_manual(values = c("Black" = "gray0", "Blue" = "royalblue2", "Green" = "seagreen2", "Other" = "orange1", "Red" = "red1", "Transparent/White"= "gray61")) + labs(x = "", y = "Microplastic Composition") + guides(fill=guide_legend("Particle Color")) +
    geom_text(aes(label = percent(number/968)), size = 3, color = "white", position = position_fill(vjust = 0.5)) + theme_bw()+ theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+        axis.ticks.x=element_blank(), 
+        axis.text.y = element_text(size = 3)) 
 plot(fig_part_color) 
   
 ```
